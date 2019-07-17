@@ -22,8 +22,7 @@
   "author": "emi",
   "license": "MIT",
   "homepage": "https://github.com/rsksmart/rsk-contract-verifier",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "^7.5.0",
     "@babel/core": "^7.5.0",
@@ -39,6 +38,8 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.10"
+    "nodemon": "^1.18.10",
+    "openzeppelin-solidity": "^2.3.0",
+    "glob": "^7.1.4"
   }
 }
