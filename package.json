@@ -22,7 +22,9 @@
   "author": "emi",
   "license": "MIT",
   "homepage": "https://github.com/rsksmart/rsk-contract-verifier",
-  "dependencies": {},
+  "dependencies": {
+    "solc": "^0.5.9"
+  },
   "devDependencies": {
     "@babel/cli": "^7.5.0",
     "@babel/core": "^7.5.0",
