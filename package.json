@@ -1,0 +1,44 @@
+{
+  "name": "rsk-contract-verifier",
+  "version": "0.0.1",
+  "description": "Smart contract source code verifier",
+  "main": "",
+  "scripts": {
+    "dev": "npx nodemon src/contract-verifier.js --exec babel-node | ./node_modules/.bin/bunyan -o short",
+    "build": "npm run clean && ./node_modules/.bin/babel src -d dist --copy-files",
+    "clean": "rm -rf dist",
+    "md": "mkdir dist",
+    "lint": "npx eslint src/**/*",
+    "test": "npx mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rsksmart/rsk-contract-verifier"
+  },
+  "keywords": [
+    "rsk",
+    "verifier"
+  ],
+  "author": "emi",
+  "license": "MIT",
+  "homepage": "https://github.com/rsksmart/rsk-contract-verifier",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.0",
+    "@babel/node": "^7.5.0",
+    "@babel/preset-env": "^7.5.0",
+    "@babel/register": "^7.4.4",
+    "chai": "^4.2.0",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-mocha": "^5.3.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "mocha": "^5.2.0",
+    "nodemon": "^1.18.10"
+  }
+}

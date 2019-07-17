@@ -1,0 +1,7 @@
+node_modules
+/config.json
+.vscode
+src/tmp
+tmp
+coverage
+.nyc_output
