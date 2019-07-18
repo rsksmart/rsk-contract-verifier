@@ -4,8 +4,8 @@
   "description": "Smart contract source code verifier",
   "main": "",
   "scripts": {
-    "dev": "npx nodemon src/contract-verifier.js --exec babel-node | ./node_modules/.bin/bunyan -o short",
-    "build": "npm run clean && ./node_modules/.bin/babel src -d dist --copy-files",
+    "dev": "npx nodemon src/contract-verifier.js --exec babel-node | npx bunyan -o short",
+    "build": "npm run clean && npx babel src -d dist --copy-files",
     "clean": "rm -rf dist",
     "md": "mkdir dist",
     "lint": "npx eslint src/**/*",
@@ -27,7 +27,10 @@
     "ethereumjs-account": "^3.0.0",
     "ethereumjs-tx": "^2.1.0",
     "ethereumjs-util": "^6.1.0",
-    "ethereumjs-vm": "^4.0.0-beta.1"
+    "ethereumjs-vm": "^4.0.0-beta.1",
+    "bunyan": "^2.0.2",
+    "express": "^4.16.4",
+    "body-parser": "^1.19.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",
