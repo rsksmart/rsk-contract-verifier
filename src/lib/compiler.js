@@ -1,12 +1,11 @@
 import solc from 'solc'
-import { toBuffer, toHexString } from './utils'
 
 function Compiler ({ binPath } = {}) {
   const createInput = ({ sources, settings } = {}) => {
     settings = settings || {}
     settings.outputSelection = settings.outputSelection || {
       '*': {
-        '*': ['*']
+        '*': ['abi', 'evm.bytecode']
       }
     }
     return {
@@ -56,22 +55,6 @@ function Compiler ({ binPath } = {}) {
     }
   }
 
-  const extractMetadataFromBytecode = (bytecodeStringOrBuffer) => {
-    const buffer = toBuffer(bytecodeStringOrBuffer)
-    const metaDataStart = buffer.length - buffer.readUInt16BE(buffer.length - 2) - 2
-    let metadata
-    let bytecode = toHexString(bytecodeStringOrBuffer)
-    if (metaDataStart) {
-      metadata = buffer.slice(metaDataStart, buffer.length).toString('hex')
-      if (metadata.substr(0, 4) === 'a165') {
-        bytecode = buffer.slice(0, metaDataStart).toString('hex')
-      } else {
-        metadata = undefined
-      }
-    }
-    return { bytecode, metadata }
-  }
-
   const getImport = (path, contracts) => {
     const parts = path.split('/')
     let file = parts.pop()
@@ -90,7 +73,11 @@ function Compiler ({ binPath } = {}) {
       return getImport(path, imports)
     }
   }
-  return Object.freeze({ compile, createInput, extractMetadataFromBytecode, getImports })
+  return Object.freeze({
+    compile,
+    createInput,
+    getImports
+  })
 }
 
 export default Compiler

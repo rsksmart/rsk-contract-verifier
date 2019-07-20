@@ -23,14 +23,15 @@
   "license": "MIT",
   "homepage": "https://github.com/rsksmart/rsk-contract-verifier",
   "dependencies": {
-    "solc": "^0.5.9",
+    "body-parser": "^1.19.0",
+    "bunyan": "^2.0.2",
+    "cbor": "^4.1.5",
     "ethereumjs-account": "^3.0.0",
     "ethereumjs-tx": "^2.1.0",
     "ethereumjs-util": "^6.1.0",
     "ethereumjs-vm": "^4.0.0-beta.1",
-    "bunyan": "^2.0.2",
     "express": "^4.16.4",
-    "body-parser": "^1.19.0"
+    "solc": "^0.5.9"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",

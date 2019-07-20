@@ -2,6 +2,7 @@ import Compiler from './compiler'
 import Evm from './evm'
 import { keccak256 } from 'ethereumjs-util'
 import { toBuffer, toHexString } from './utils'
+import { extractMetadataFromBytecode } from './solidityMetadata'
 
 function Verifier (options = {}) {
   const compiler = Compiler(options)
@@ -34,8 +35,8 @@ function Verifier (options = {}) {
       const deployBytecode = compiled.evm.bytecode.object
       const sender = await createSender()
       const deployResult = await evm.deploy(deployBytecode, sender.privKey, { gas: 10000000000 })
-      const resultBytecode = compiler.extractMetadataFromBytecode(deployResult.vm.return).bytecode
-      const { bytecode, metadata } = compiler.extractMetadataFromBytecode(bytecodeString)
+      const resultBytecode = extractMetadataFromBytecode(deployResult.vm.return).bytecode
+      const { bytecode, metadata } = extractMetadataFromBytecode(bytecodeString)
       const bytecodeHash = hash(bytecode)
       const resultBytecodeHash = hash(resultBytecode)
       const { gas, gasUsed } = deployResult.vm
