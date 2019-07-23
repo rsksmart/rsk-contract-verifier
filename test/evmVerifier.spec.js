@@ -1,12 +1,12 @@
 import { expect } from 'chai'
-import Verifier from '../src/lib/verifier'
+import Verifier from '../src/lib/evmVerifier'
 import { truffleParser } from './shared'
 import { truffleContracts } from './contracts'
 
 const contracts = truffleContracts()
 const verifier = Verifier()
 
-describe(`# Verifier`, function () {
+describe(`# EvmVerifier`, function () {
   testContract('helloWorld')
   testContract('Test721')
   testContract('TestErc20')
@@ -14,12 +14,12 @@ describe(`# Verifier`, function () {
 
 function testContract (contractName) {
   const testData = contracts[contractName]
-  const { version, bytecode, source } = truffleParser(testData)
+  const { version, deployedBytecode, source } = truffleParser(testData)
   describe(`## ${contractName}`, function () {
     describe(`# verify`, function () {
       this.timeout(90000)
       it(`should verify a contract`, async () => {
-        const verification = await verifier.verify(source, { imports: contracts, version, bytecode })
+        const verification = await verifier.verify(deployedBytecode, source, { imports: contracts, version })
         expect(verification, 'verifification should be an object').to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')

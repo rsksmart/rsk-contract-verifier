@@ -1,25 +1,13 @@
 import Compiler from './compiler'
-import Evm from './evm'
-import { keccak256 } from 'ethereumjs-util'
-import { toBuffer, toHexString } from './utils'
+import { hash } from './utils'
 import { extractMetadataFromBytecode } from './solidityMetadata'
 
 function Verifier (options = {}) {
   const compiler = Compiler(options)
-  const evm = Evm(options)
 
-  const createSender = async ({ balance } = {}) => {
-    balance = balance || '0xffffffffff'
-    const { address, privKey } = evm.createAddress()
-    const account = await evm.createAccount(address, { balance })
-    return { address, account, privKey }
-  }
-
-  const hash = value => toHexString(keccak256(toBuffer(value)))
-
-  const verify = async (bytecodeString, source, options = {}) => {
+  const verify = async (source, options = {}) => {
     try {
-      const { version, imports } = options
+      const { version, imports, bytecode } = options
       const settings = options.settings || {}
       const key = 'testContract'
       let sources = {}
@@ -32,17 +20,12 @@ function Verifier (options = {}) {
 
       if (!contracts || !contracts[key]) throw new Error('Empty compilation result')
       const compiled = Object.values(contracts[key])[0]
-      const deployBytecode = compiled.evm.bytecode.object
-      const sender = await createSender()
-      const deployResult = await evm.deploy(deployBytecode, sender.privKey, { gas: 10000000000 })
-      const resultBytecode = extractMetadataFromBytecode(deployResult.vm.return).bytecode
-      const { bytecode, metadata } = extractMetadataFromBytecode(bytecodeString)
-      const bytecodeHash = hash(bytecode)
+
+      const { bytecode: resultBytecode } = extractMetadataFromBytecode(compiled.evm.bytecode.object)
       const resultBytecodeHash = hash(resultBytecode)
-      const { gas, gasUsed } = deployResult.vm
-      const deploy = Object.assign({}, { gas, gasUsed })
-      // console.log(deployResult.vm.runState)
-      return { metadata, bytecode, resultBytecode, deploy, bytecodeHash, resultBytecodeHash }
+      const { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(resultBytecode, bytecode)
+      const bytecodeHash = hash(orgBytecode)
+      return { bytecode, metadata, resultBytecode, bytecodeHash, resultBytecodeHash }
     } catch (err) {
       return Promise.reject(err)
     }

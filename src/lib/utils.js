@@ -1,3 +1,5 @@
+import { keccak256 } from 'ethereumjs-util'
+
 export const remove0x = str => (str && str.substring(0, 2) === '0x') ? str.substring(2) : str
 
 const isHexString = str => {
@@ -43,3 +45,5 @@ export const fordwardBytesDifference = (a, b) => {
   }
   return difference
 }
+
+export const getHash = (value, encoding = 'hex') => toHexString(keccak256(toBuffer(value, encoding)))
