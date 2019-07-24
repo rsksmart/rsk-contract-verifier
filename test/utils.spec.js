@@ -40,4 +40,20 @@ describe(`# utils`, function () {
       })
     }
   })
+
+  describe(`isReleaseVersion()`, function () {
+    const test = [
+      ['9.2.3', true],
+      ['222222.9999.2222', true],
+      ['1.2.3.4', false],
+      ['test', false],
+      ['123.23.323.c', false]
+    ]
+    for (let t of test) {
+      const [value, expected] = t
+      it(`${value} should be ${expected}`, () => {
+        expect(utils.isReleaseVersion(value)).to.be.deep.equal(expected)
+      })
+    }
+  })
 })

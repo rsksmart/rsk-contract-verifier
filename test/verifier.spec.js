@@ -4,7 +4,6 @@ import { truffleParser } from './shared'
 import { truffleContracts } from './contracts'
 
 const contracts = truffleContracts()
-const verifier = Verifier()
 
 describe(`# Verifier`, function () {
   testContract('helloWorld')
@@ -13,6 +12,7 @@ describe(`# Verifier`, function () {
 })
 
 function testContract (contractName) {
+  const verifier = Verifier()
   const testData = contracts[contractName]
   const { version, bytecode, source } = truffleParser(testData)
   describe(`## ${contractName}`, function () {

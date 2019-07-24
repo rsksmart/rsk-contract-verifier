@@ -47,3 +47,5 @@ export const fordwardBytesDifference = (a, b) => {
 }
 
 export const getHash = (value, encoding = 'hex') => toHexString(keccak256(toBuffer(value, encoding)))
+
+export const isReleaseVersion = version => /^[0-9]+\.[0-9]+\.[0-9]+$/.test(version)

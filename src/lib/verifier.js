@@ -1,5 +1,5 @@
 import Compiler from './compiler'
-import { hash } from './utils'
+import { getHash } from './utils'
 import { extractMetadataFromBytecode } from './solidityMetadata'
 
 function Verifier (options = {}) {
@@ -22,16 +22,16 @@ function Verifier (options = {}) {
       const compiled = Object.values(contracts[key])[0]
 
       const { bytecode: resultBytecode } = extractMetadataFromBytecode(compiled.evm.bytecode.object)
-      const resultBytecodeHash = hash(resultBytecode)
+      const resultBytecodeHash = getHash(resultBytecode)
       const { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(resultBytecode, bytecode)
-      const bytecodeHash = hash(orgBytecode)
+      const bytecodeHash = getHash(orgBytecode)
       return { bytecode, metadata, resultBytecode, bytecodeHash, resultBytecodeHash }
     } catch (err) {
       return Promise.reject(err)
     }
   }
 
-  return Object.freeze({ verify, hash })
+  return Object.freeze({ verify, hash: getHash })
 }
 
 export default Verifier

@@ -16,9 +16,12 @@ describe(`# Compiler`, function () {
       expect(compiled.errors).to.be.equal(undefined)
       expect(compiled).has.ownProperty('contracts')
       const contract = compiled.contracts[solFile][contractName]
+      expect(contract).has.ownProperty('evm')
+      expect(contract.evm).has.ownProperty('bytecode')
+      expect(contract.evm).has.ownProperty('deployedBytecode')
       let compiledBytecode = contract.evm.bytecode.object
       let compiledDeployedBytecode = contract.evm.deployedBytecode.object
-      expect(bytecode, 'bytecode').to.be.equal(`0x${compiledBytecode}`)
+      expect(bytecode).to.be.equal(`0x${compiledBytecode}`)
       expect(deployedBytecode).to.be.equal(`0x${compiledDeployedBytecode}`)
     })
   })

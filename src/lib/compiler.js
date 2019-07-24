@@ -1,11 +1,13 @@
-import solc from 'solc'
+import GetSolc from './getSolc'
 
 function Compiler ({ binPath } = {}) {
+  const getSolc = GetSolc({ binPath })
+
   const createInput = ({ sources, settings } = {}) => {
     settings = settings || {}
     settings.outputSelection = settings.outputSelection || {
       '*': {
-        '*': ['abi', 'evm.bytecode']
+        '*': ['abi', 'evm.bytecode', 'evm.deployedBytecode']
       }
     }
     return {
@@ -15,15 +17,8 @@ function Compiler ({ binPath } = {}) {
     }
   }
 
-  const getVersionString = version => {
-    if (typeof version !== 'string') throw new Error(`Invalid version ${version}`)
-    if (version[0] !== 'v') version = `v${version}`
-    return version
-  }
-
   const getSnapshot = async version => {
     try {
-      if (version !== 'latest') version = getVersionString(version)
       let snapshot = await loadVersion(version)
       return snapshot
     } catch (err) {
@@ -31,13 +26,7 @@ function Compiler ({ binPath } = {}) {
     }
   }
   const loadVersion = version => {
-    return new Promise((resolve, reject) => {
-      solc.loadRemoteVersion(version, (err, snapshot) => {
-        if (err) return reject(err)
-        if (snapshot) return resolve(snapshot)
-        return reject(new Error(`Can't load solidity snapshot, version: ${version}`))
-      })
-    })
+    return getSolc.load(version)
   }
 
   const compile = async (input, { version, resolveImports } = {}) => {
