@@ -1,8 +1,9 @@
 import { keccak256 } from 'ethereumjs-util'
+import crypto from 'crypto'
 
 export const remove0x = str => (str && str.substring(0, 2) === '0x') ? str.substring(2) : str
 
-const isHexString = str => {
+export const isHexString = str => {
   if (str === undefined || str === null) return str
   str = `${str}`
   str = (str.substring(0, 2) === '0x') ? str.substring(2) : str
@@ -49,3 +50,5 @@ export const fordwardBytesDifference = (a, b) => {
 export const getHash = (value, encoding = 'hex') => toHexString(keccak256(toBuffer(value, encoding)))
 
 export const isReleaseVersion = version => /^[0-9]+\.[0-9]+\.[0-9]+$/.test(version)
+
+export const randomHexString = (size = 32) => toHexString(crypto.randomBytes(size))

@@ -56,4 +56,24 @@ describe(`# utils`, function () {
       })
     }
   })
+
+  describe(`getHash`, function () {
+    const test = [
+      ['', '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470']
+    ]
+
+    it('null & undefined should throw', () => {
+      expect(() => utils.getHash(null), 'null').to.throw()
+      expect(() => utils.getHash(undefined), 'undefined').to.throw()
+    })
+
+    for (let t of test) {
+      const [value, expected] = t
+      it(`${value} should be ${expected}`, () => {
+        expect(utils.getHash(value)).to.be.deep.equal(expected)
+      })
+    }
+  })
 })
+
+
