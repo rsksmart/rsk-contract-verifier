@@ -9,7 +9,8 @@
     "clean": "rm -rf dist",
     "md": "mkdir dist",
     "lint": "npx eslint src/**/*",
-    "test": "npx mocha"
+    "test": "npx mocha",
+    "testFile": "npx mocha --opts ./test/singleFile.opts"
   },
   "repository": {
     "type": "git",
