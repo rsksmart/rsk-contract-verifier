@@ -1,7 +1,7 @@
 import GetSolc from './getSolc'
 
-function Compiler ({ binPath } = {}) {
-  const getSolc = GetSolc({ binPath })
+function Compiler ({ solcCache } = {}) {
+  const getSolc = GetSolc({ solcCache })
 
   const createInput = ({ sources, settings } = {}) => {
     settings = settings || {}
