@@ -9,12 +9,11 @@ const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
 const getStat = promisify(fs.stat)
 
-function GetSolc ({ binPath, solcUrl }) {
-
+function GetSolc ({ solcCache, solcUrl, listUrl }) {
   solcUrl = solcUrl || 'https://ethereum.github.io/solc-bin/bin'
-  const listUrl = `${solcUrl}/list.json`
+  listUrl = listUrl || `${solcUrl}/list.json`
 
-  const DIR = binPath || '/tmp/solc'
+  const DIR = solcCache || '/tmp/solc'
   let versionsList
 
   if (!fs.existsSync(DIR)) {

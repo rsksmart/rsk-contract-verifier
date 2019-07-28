@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import GetSolc from '../src/lib/getSolc'
 import { getHash } from '../src/lib/utils'
 
-const binPath = '/tmp'
-let getSolc = GetSolc({ binPath })
+const solcCache = '/tmp'
+let getSolc = GetSolc({ solcCache })
 
 const test = JSON.parse(`{
   "path": "soljson-v0.5.8+commit.23d335f2.js",

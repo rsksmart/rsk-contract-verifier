@@ -5,7 +5,7 @@ import { truffleParser } from './shared'
 import { extractMetadataFromBytecode } from '../src/lib/solidityMetadata'
 
 const contracts = truffleContracts()
-const comp = Compiler({ binPath: '/tmp' })
+const comp = Compiler({ solcCache: '/tmp' })
 
 describe(`# Contracts`, function () {
   testContract('helloWorld')

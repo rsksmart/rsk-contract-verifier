@@ -3,7 +3,7 @@ import Compiler from '../src/lib/compiler'
 import { truffleContracts } from './contracts'
 import { truffleParser } from './shared'
 
-const comp = Compiler({ binPath: '/tmp' })
+const comp = Compiler({ solcCache: '/tmp' })
 const test = truffleContracts()['helloWorld']
 const { bytecode, contractName, deployedBytecode, version, solFile, metadata, sources, settings } = truffleParser(test)
 
