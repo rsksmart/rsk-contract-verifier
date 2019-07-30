@@ -4,7 +4,7 @@
   "description": "Smart contract source code verifier",
   "main": "",
   "scripts": {
-    "dev": "npx nodemon src/contract-verifier-api.js --exec babel-node | npx bunyan -o short",
+    "dev": "npx nodemon src/contract-verifier-api.js | npx bunyan -o short",
     "build": "npm run clean && npx babel src -d dist --copy-files",
     "clean": "rm -rf dist",
     "md": "mkdir dist",
