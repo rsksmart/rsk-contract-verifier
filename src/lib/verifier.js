@@ -5,9 +5,9 @@ import { extractMetadataFromBytecode } from './solidityMetadata'
 function Verifier (options = {}) {
   const compiler = Compiler(options)
 
-  const verify = async (source, options = {}) => {
+  const verify = async (options = {}) => {
     try {
-      const { version, imports, bytecode } = options
+      const { version, imports, bytecode, source } = options
       const settings = options.settings || {}
       const key = 'testContract'
       let sources = {}
