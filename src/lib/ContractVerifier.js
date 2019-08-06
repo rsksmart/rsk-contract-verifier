@@ -10,7 +10,7 @@ export const EVENTS = {
 const newVerifierService = (options) => suicidalForkedService('verifierService.js', options)
 
 export function ContractVerifier ({ timeout, log }) {
-  timeout = timeout || 10000
+  timeout = timeout || 60000
   log = log || console
   const queue = Queue()
   const verifying = new Map()
