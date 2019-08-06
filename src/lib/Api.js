@@ -8,10 +8,10 @@ export function Api (config, { log }) {
   const getSolc = GetSolc(config)
   const requests = new Map()
 
-  const resolveId = ({ id, error, data }) => {
+  const resolveId = ({ id, error, data, request }) => {
     const socket = requests.get(id)
     requests.delete(id)
-    apiResponse(socket, 'verify', { error, data })
+    apiResponse(socket, 'verify', { error, data, request })
   }
 
   verifier.events.on(EVENTS.VERIFICATION, result => {
@@ -26,7 +26,7 @@ export function Api (config, { log }) {
     const { action, params } = payload
     switch (action) {
       case 'verify':
-        const id = verifier.verify(params)
+        const id = await verifier.verify(params)
         if (!id) return apiResponse(socket, action, { error: 'Uknonwn error' })
         requests.set(id, socket)
         break
@@ -40,9 +40,8 @@ export function Api (config, { log }) {
   return Object.freeze({ run })
 }
 
-function apiResponse (socket, action, { error, data }) {
-  const event = 'data'
-  socket.emit(event, { action, error, data })
+function apiResponse (socket, action, { error, data, request }) {
+  socket.emit('data', { action, error, data, request })
 }
 
 export default Api

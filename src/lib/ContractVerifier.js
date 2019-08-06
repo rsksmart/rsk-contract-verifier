@@ -13,7 +13,7 @@ export function ContractVerifier ({ timeout, log }) {
   timeout = timeout || 10000
   log = log || console
   const queue = Queue()
-  const verifing = new Set()
+  const verifying = new Map()
   const events = new EventEmitter()
 
   const verify = payload => {
@@ -22,13 +22,16 @@ export function ContractVerifier ({ timeout, log }) {
     return id
   }
   const resolve = (id, error, data) => {
-    verifing.delete(id)
-    events.emit(EVENTS.VERIFICATION, { id, data, error })
+    const request = verifying.get(id)
+    verifying.delete(id)
+    log.debug(`Verification done ${id}`)
+    log.trace(JSON.stringify(data))
+    events.emit(EVENTS.VERIFICATION, { id, data, error, request })
     processNext()
   }
 
   const processNext = () => {
-    if (verifing.size > 0) return
+    if (verifying.size > 0) return
     const task = queue.next()
     if (!task) return
     const [id, payload] = task
@@ -37,7 +40,7 @@ export function ContractVerifier ({ timeout, log }) {
 
   const performVerification = async (id, params) => {
     try {
-      verifing.add(id)
+      verifying.set(id, params)
       const payload = { id, params }
       const verification = await newVerifierService({ payload, timeout })
       if (!verification) throw new Error('Verifier returns an empty result')

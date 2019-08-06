@@ -24,6 +24,7 @@ io.on('connection', socket => {
   socket.on('data', payload => {
     try {
       api.run(payload, socket)
+      log.trace(JSON.stringify(payload))
     } catch (err) {
       log.debug(`Action: ${payload.action}, ERROR: ${err}`)
     }
