@@ -5,15 +5,15 @@ import { extractMetadataFromBytecode } from './solidityMetadata'
 function Verifier (options = {}) {
   const compiler = Compiler(options)
 
-  const verify = async (options = {}) => {
+  const verify = async (payload = {}, { resolveImports } = {}) => {
     try {
-      const { version, imports, bytecode, source } = options
-      const settings = options.settings || {}
-      const key = 'testContract'
+      const { version, imports, bytecode, source } = payload
+      const settings = payload.settings || {}
+      const key = 'testContract.sol'
       let sources = {}
       sources[key] = { content: source }
       const input = compiler.createInput({ sources, settings })
-      const resolveImports = compiler.getImports(imports)
+      resolveImports = resolveImports || compiler.getImports(imports)
       const result = await compiler.compile(input, { version, resolveImports })
       const { errors, contracts } = result
       if (errors) throw new Error(JSON.stringify(errors))
