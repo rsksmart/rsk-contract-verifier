@@ -23,6 +23,8 @@ function testContract (contractName) {
         expect(verification, 'verifification should be an object').to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')
+        expect(verification).has.ownProperty('abi')
+        expect(verification).has.ownProperty('opcodes').not.equal(undefined)
         expect(verification.bytecodeHash).to.be.deep.equal(verification.resultBytecodeHash)
       })
     })

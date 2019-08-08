@@ -20,12 +20,13 @@ function Verifier (options = {}) {
 
       if (!contracts || !contracts[key]) throw new Error('Empty compilation result')
       const compiled = Object.values(contracts[key])[0]
-
-      const { bytecode: resultBytecode } = extractMetadataFromBytecode(compiled.evm.bytecode.object)
+      const { evm, abi } = compiled
+      const { bytecode: resultBytecode } = extractMetadataFromBytecode(evm.bytecode.object)
+      const opcodes = evm.bytecode.opcodes
       const resultBytecodeHash = getHash(resultBytecode)
       const { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(resultBytecode, bytecode)
       const bytecodeHash = getHash(orgBytecode)
-      return { bytecode, metadata, resultBytecode, bytecodeHash, resultBytecodeHash }
+      return { bytecode, metadata, resultBytecode, bytecodeHash, resultBytecodeHash, abi, opcodes }
     } catch (err) {
       return Promise.reject(err)
     }
