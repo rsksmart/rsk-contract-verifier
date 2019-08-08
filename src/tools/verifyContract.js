@@ -41,7 +41,8 @@ async function createPayload () {
 
 function help () {
   console.log('Usage:')
-  console.log(`1 - Set "url" as enviroment variable`)
+  console.log(`1 - Set url of contract-verifier-api as an enviroment variable`)
+  console.log(`    e.g. export url='http://localhost:3008'`)
   console.log(`2 - ${process.argv[0]} ${process.argv[1]} <payload.file.json>`)
   process.exit(0)
 }
