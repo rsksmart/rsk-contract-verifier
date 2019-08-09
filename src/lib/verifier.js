@@ -16,8 +16,9 @@ function Verifier (options = {}) {
       resolveImports = resolveImports || compiler.getImports(imports)
       const result = await compiler.compile(input, { version, resolveImports })
       const { errors, contracts } = result
-      if (errors) throw new Error(JSON.stringify(errors))
-
+      
+      if (errors) return { errors }
+      
       if (!contracts || !contracts[key]) throw new Error('Empty compilation result')
       const compiled = Object.values(contracts[key])[0]
       const { evm, abi } = compiled
