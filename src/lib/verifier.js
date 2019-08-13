@@ -16,16 +16,17 @@ function Verifier (options = {}) {
       resolveImports = resolveImports || compiler.getImports(imports)
       const result = await compiler.compile(input, { version, resolveImports })
       const { errors, contracts } = result
-      
+
       if (errors) return { errors }
-      
+
       if (!contracts || !contracts[key]) throw new Error('Empty compilation result')
       const compiled = Object.values(contracts[key])[0]
       const { evm, abi } = compiled
       const { bytecode: resultBytecode } = extractMetadataFromBytecode(evm.bytecode.object)
+      const { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(bytecode)
+
       const opcodes = evm.bytecode.opcodes
       const resultBytecodeHash = getHash(resultBytecode)
-      const { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(resultBytecode, bytecode)
       const bytecodeHash = getHash(orgBytecode)
       return { bytecode, metadata, resultBytecode, bytecodeHash, resultBytecodeHash, abi, opcodes }
     } catch (err) {
