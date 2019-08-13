@@ -7,19 +7,20 @@ const contracts = truffleContracts()
 
 describe(`# Verifier`, function () {
   testContract('helloWorld')
-  testContract('Test721')
+  testContract('Test721', true) // use deployedBytecode to surf solidity metadata bug
   testContract('TestErc20')
 })
 
-function testContract (contractName) {
+function testContract (contractName, useDeployedByteCode) {
   const verifier = Verifier()
   const testData = contracts[contractName]
-  const { version, bytecode, source } = truffleParser(testData)
+  let { version, bytecode, source, deployedBytecode } = truffleParser(testData)
   describe(`| Contract: ${contractName} |`, function () {
     describe(`# verify`, function () {
       this.timeout(90000)
       it(`should verify a contract`, async () => {
-        const verification = await verifier.verify({ source, imports: contracts, version, bytecode })
+        deployedBytecode = (useDeployedByteCode) ? deployedBytecode : undefined
+        const verification = await verifier.verify({ source, imports: contracts, version, bytecode, deployedBytecode })
         expect(verification, 'verifification should be an object').to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')
