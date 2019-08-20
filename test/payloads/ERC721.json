@@ -1,6 +1,6 @@
 {
   "address": "0x1e6d0bad215c6407f552e4d1260e7bae90005ab2",
-  
+  "name":"Test721",
   "source": "pragma solidity ^0.5.0;\n\nimport 'openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol';\nimport 'openzeppelin-solidity/contracts/token/ERC721/ERC721Mintable.sol';\n\ncontract Test721 is ERC721Full, ERC721Mintable {\n  constructor() ERC721Full(\"Test721\", \"TEST721\") public {\n  }\n}",
   "imports": [
     {

@@ -1,4 +1,5 @@
 {
+  "name": "TestErc20",
   "source": "pragma solidity ^0.5.0;\n\nimport \"openzeppelin-solidity/contracts/token/ERC20/ERC20.sol\";\nimport \"openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol\";\n\ncontract TestErc20 is ERC20, ERC20Detailed {\nuint private INITIAL_SUPPLY = 10000e18;\nconstructor () public\nERC20Detailed(\"CuhToken\", \"CUH\", 18)\n{\n_mint(msg.sender, INITIAL_SUPPLY);\n}\n}\n",
   "imports": [
     {

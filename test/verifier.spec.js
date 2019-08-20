@@ -20,7 +20,7 @@ function testContract (contractName, useDeployedByteCode) {
       this.timeout(90000)
       it(`should verify a contract`, async () => {
         deployedBytecode = (useDeployedByteCode) ? deployedBytecode : undefined
-        const verification = await verifier.verify({ source, imports: contracts, version, bytecode, deployedBytecode })
+        const verification = await verifier.verify({ source, imports: contracts, version, bytecode, deployedBytecode, name: contractName })
         expect(verification, 'verifification should be an object').to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')

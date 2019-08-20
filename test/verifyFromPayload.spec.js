@@ -6,7 +6,7 @@ import payloads from './payloads/'
 describe(`# Verify from payload`, () => {
   for (let key in payloads) {
     let payload = payloads[key]
-    describe(`# verifyParams ${key}`, function () {
+    describe(`# contract ${key}`, function () {
       this.timeout(20000)
       it('should verify a contract from payload', async () => {
         const verification = await verifyParams(payload)

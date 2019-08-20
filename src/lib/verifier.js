@@ -1,6 +1,9 @@
 import Compiler from './compiler'
+import { link } from './linker'
 import { getHash, add0x } from './utils'
 import { extractMetadataFromBytecode } from './solidityMetadata'
+
+const KEY = 'CONTRACT_VERIFIER'
 
 function Verifier (options = {}) {
   const compiler = Compiler(options)
@@ -9,11 +12,11 @@ function Verifier (options = {}) {
     try {
       /** deployedBytecode is optional, used to surf metadata bug
        * if it is provided  the verifier will try to extract the original metadata from it */
-
-      const { version, imports, bytecode, source, deployedBytecode } = payload
+      const { version, imports, bytecode, source, deployedBytecode, libraries, name } = payload
+      const libs = addPrefixToLibraries(libraries)
+      if (!name) throw new Error('Invalid contract name')
       resolveImports = resolveImports || compiler.getImports(imports)
       const settings = payload.settings || {}
-      const key = 'testContract.sol'
       let sources = {}
       const usedSources = []
 
@@ -26,7 +29,7 @@ function Verifier (options = {}) {
         return resolveImports(path)
       }
 
-      sources[key] = { content: source }
+      sources[KEY] = { content: source }
       const input = compiler.createInput({ sources, settings })
 
       const result = await compiler.compile(input, { version, resolveImports: updateUsedSources })
@@ -34,10 +37,10 @@ function Verifier (options = {}) {
 
       if (errors) return { errors }
 
-      if (!contracts || !contracts[key]) throw new Error('Empty compilation result')
-      const compiled = Object.values(contracts[key])[0]
+      if (!contracts || !contracts[KEY]) throw new Error('Empty compilation result')
+      const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
-      const { resultBytecode, orgBytecode, metadata } = verifyResults(bytecode, evm, deployedBytecode)
+      const { resultBytecode, orgBytecode, metadata } = verifyResults(bytecode, evm, deployedBytecode, libs)
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
@@ -51,14 +54,18 @@ function Verifier (options = {}) {
   return Object.freeze({ verify, hash: getHash })
 }
 
-export function verifyResults (bytecode, evm, deployedBytecode) {
+export function verifyResults (bytecode, evm, deployedBytecode, libs) {
   let { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(bytecode)
-  let { bytecode: resultBytecode } = extractMetadataFromBytecode(evm.bytecode.object)
+  let evmBytecode = evm.bytecode.object
+
+  if (libs) evmBytecode = link(evmBytecode, libs)
+  let { bytecode: resultBytecode } = extractMetadataFromBytecode(evmBytecode)
 
   /**
     * To contain solidity compiler metadata bug, if deployedBytecode
     * is provided, try to extract metadata from it
     */
+
   if (!metadata && deployedBytecode) {
     // extract metadata from original deployed bytecode
     const deployedBytecodeResult = extractMetadataFromBytecode(deployedBytecode)
@@ -75,4 +82,13 @@ export function verifyResults (bytecode, evm, deployedBytecode) {
   return { resultBytecode, orgBytecode, metadata }
 }
 
+function addPrefixToLibraries (libraries) {
+  if (!libraries || Array.isArray(libraries)) return
+  const libs = {}
+  for (let lib in libraries) {
+    const name = `${KEY}:${lib}`
+    libs[name] = libraries[lib]
+  }
+  return libs
+}
 export default Verifier
