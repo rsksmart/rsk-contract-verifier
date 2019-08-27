@@ -13,7 +13,10 @@ describe(`# Verify from payload`, () => {
         expect(verification).to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')
+        expect(verification).has.ownProperty('usedSettings')
+        expect(verification).has.ownProperty('usedLibraries')
         expect(verification.bytecodeHash, 'hashes').to.be.deep.equal(verification.resultBytecodeHash)
+        expect(verification.usedLibraries).to.be.deep.equal(payload.libraries)
       })
     })
   }

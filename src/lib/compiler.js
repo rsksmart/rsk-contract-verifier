@@ -7,7 +7,13 @@ function Compiler ({ solcCache } = {}) {
     settings = settings || {}
     settings.outputSelection = settings.outputSelection || {
       '*': {
-        '*': ['abi', 'evm.bytecode', 'evm.deployedBytecode']
+        '*': [
+          'abi',
+          'metadata',
+          'evm.bytecode',
+          'evm.deployedBytecode',
+          'evm.methodIdentifiers'
+        ]
       }
     }
     return {

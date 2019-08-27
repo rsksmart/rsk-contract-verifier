@@ -1,3 +1,6 @@
 import linker from 'solc/linker'
 
-export const link = linker.linkBytecode
+const link = linker.linkBytecode
+const find = linker.findLinkReferences
+
+export default { link, find }

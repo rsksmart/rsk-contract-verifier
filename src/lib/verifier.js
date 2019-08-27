@@ -1,5 +1,5 @@
 import Compiler from './compiler'
-import { link } from './linker'
+import linker from './linker'
 import { getHash, add0x } from './utils'
 import { extractMetadataFromBytecode } from './solidityMetadata'
 
@@ -13,7 +13,7 @@ function Verifier (options = {}) {
       /** deployedBytecode is optional, used to surf metadata bug
        * if it is provided  the verifier will try to extract the original metadata from it */
       const { version, imports, bytecode, source, deployedBytecode, libraries, name } = payload
-      const libs = addPrefixToLibraries(libraries)
+
       if (!name) throw new Error('Invalid contract name')
       resolveImports = resolveImports || compiler.getImports(imports)
       const settings = payload.settings || {}
@@ -40,12 +40,28 @@ function Verifier (options = {}) {
       if (!contracts || !contracts[KEY]) throw new Error('Empty compilation result')
       const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
-      const { resultBytecode, orgBytecode, metadata } = verifyResults(bytecode, evm, deployedBytecode, libs)
+
+      const { resultBytecode, orgBytecode, metadata, usedLibraries } = verifyResults(bytecode, evm, deployedBytecode, libraries)
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
       const opcodes = evm.bytecode.opcodes
-      return { bytecode, metadata, resultBytecode, bytecodeHash, resultBytecodeHash, abi, opcodes, usedSources }
+      const { methodIdentifiers } = evm
+      const usedSettings = resultSettings(compiled)
+      return {
+        name,
+        usedSettings,
+        usedLibraries,
+        bytecode,
+        metadata,
+        resultBytecode,
+        bytecodeHash,
+        resultBytecodeHash,
+        abi,
+        opcodes,
+        usedSources,
+        methodIdentifiers
+      }
     } catch (err) {
       return Promise.reject(err)
     }
@@ -57,8 +73,8 @@ function Verifier (options = {}) {
 export function verifyResults (bytecode, evm, deployedBytecode, libs) {
   let { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(bytecode)
   let evmBytecode = evm.bytecode.object
-
-  if (libs) evmBytecode = link(evmBytecode, libs)
+  const usedLibraries = getUsedLibraries(evmBytecode, libs)
+  if (libs) evmBytecode = linker.link(evmBytecode, addPrefixToLibraries(libs))
   let { bytecode: resultBytecode } = extractMetadataFromBytecode(evmBytecode)
 
   /**
@@ -79,16 +95,47 @@ export function verifyResults (bytecode, evm, deployedBytecode, libs) {
     resultBytecode = resultBytecode.substr(0, resultBytecode.indexOf(compiledMetadata))
   }
 
-  return { resultBytecode, orgBytecode, metadata }
+  return { resultBytecode, orgBytecode, metadata, usedLibraries }
+}
+
+function addLibraryPrefix (lib) {
+  return `${KEY}:${lib}`
+}
+
+function removeLibraryPrefix (lib) {
+  const [prefix, name] = lib.split(':')
+  return (prefix === KEY) ? name : lib
 }
 
 function addPrefixToLibraries (libraries) {
   if (!libraries || Array.isArray(libraries)) return
   const libs = {}
   for (let lib in libraries) {
-    const name = `${KEY}:${lib}`
+    const name = addLibraryPrefix(lib)
     libs[name] = libraries[lib]
   }
   return libs
 }
+
+function getUsedLibraries (bytecode, libraries) {
+  const used = Object.keys(linker.find(bytecode))
+    .map(name => removeLibraryPrefix(name))
+  if (used.length) {
+    const usedLibraries = {}
+    for (let name of used) {
+      let address = libraries[name]
+      if (address) {
+        usedLibraries[name] = address
+      }
+    }
+    return usedLibraries
+  }
+}
+
+function resultSettings (compiled) {
+  const { compiler, language, settings } = JSON.parse(compiled.metadata)
+  const { evmVersion, libraries, optimizer, remappings } = settings
+  return { compiler, language, evmVersion, libraries, optimizer, remappings }
+}
+
 export default Verifier
