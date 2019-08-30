@@ -55,13 +55,14 @@ before run the server:
 
 ``` javascript
 {
-  "address": "127.0.0.1",
-  "port": 3008,
-  "solcCache": "/tmp",
-  "log": {
-    "level":"debug"
-    "file":"/var/log/rsk-contract-verifier/contract-verifier.log"
-  }
+  address: '127.0.0.1', // binding address
+  port: 3008, // binding port
+  solcCache: '/tmp', // solc compiler versions cache
+  log: {
+    level: 'debug', // log level
+    file: '/var/log/rsk-contract-verifier/contract-verifier.log' // (optional) log file
+  },
+  timeout: 10000 // verification timeout
 }
 
   ```
