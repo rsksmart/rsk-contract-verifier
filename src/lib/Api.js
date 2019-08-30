@@ -4,7 +4,8 @@ import GetSolc from './getSolc'
 
 export function Api (config, { log }) {
   log = log || console
-  const verifier = ContractVerifier({ log })
+  const { timeout } = config
+  const verifier = ContractVerifier({ log, timeout })
   const getSolc = GetSolc(config)
   const requests = new Map()
 
