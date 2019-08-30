@@ -10,7 +10,8 @@
     "md": "mkdir dist",
     "lint": "npx eslint src/**/*",
     "test": "npx mocha",
-    "testFile": "npx mocha --opts ./test/singleFile.opts"
+    "test-file": "npx mocha --opts ./test/singleFile.opts",
+    "cache-solc":"node dist/tools/cacheSolc.js | npx bunyan "
   },
   "repository": {
     "type": "git",

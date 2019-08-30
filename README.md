@@ -5,3 +5,63 @@
 ## Requisites
 
 - node >= 10.16.0
+
+## Install
+
+- Install dependecies
+
+``` shell
+    npm install
+  ```
+
+## Configuration file
+
+(optional)
+
+``` shell
+    cp config-example.json config.json
+  ```
+
+## Server start
+
+``` shell
+  node dist/contract-verifier-api.js
+```
+
+## Cache solc compilers
+
+To improve the speed of verification process you can download all the compiler versions
+before run the server:
+
+``` shell
+  npm run cache-solc
+```
+
+## Configuration
+  
+  **config.json**
+  See defaults on: **lib/defaultConfig**
+  *(config.json overrides this values)*
+
+  Use:
+  
+  ```shell
+  node dist/tools/showConfig.js
+  ```
+
+  to check current configuration
+  
+**Configurarion Example:**
+
+``` javascript
+{
+  "address": "127.0.0.1",
+  "port": 3008,
+  "solcCache": "/tmp",
+  "log": {
+    "level":"debug"
+    "file":"/var/log/rsk-contract-verifier/contract-verifier.log"
+  }
+}
+
+  ```
