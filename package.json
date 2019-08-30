@@ -11,7 +11,7 @@
     "lint": "npx eslint src/**/*",
     "test": "npx mocha",
     "test-file": "npx mocha --opts ./test/singleFile.opts",
-    "cache-solc":"node dist/tools/cacheSolc.js | npx bunyan "
+    "cache-solc": "node dist/tools/cacheSolc.js | npx bunyan "
   },
   "repository": {
     "type": "git",
