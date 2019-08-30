@@ -1,0 +1,9 @@
+{
+  "address": "127.0.0.1",
+  "port": 3008,
+  "solcCache": "/tmp",
+  "log": {
+    "level": "debug",
+    "file": "/var/log/rsk-contract-verifier/contract-verifier.log"
+  }
+}
