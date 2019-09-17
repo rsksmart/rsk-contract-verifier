@@ -28,7 +28,7 @@ function Api(config, { log }) {
     switch (action) {
       case 'verify':
         const id = await verifier.verify(params);
-        if (!id) return apiResponse(socket, action, { error: 'Uknonwn error' });
+        if (!id) return apiResponse(socket, action, { error: 'Unknown error' });
         requests.set(id, socket);
         break;
 

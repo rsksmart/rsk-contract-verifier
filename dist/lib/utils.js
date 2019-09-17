@@ -1,4 +1,4 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.randomHexString = exports.isReleaseVersion = exports.getHash = exports.fordwardBytesDifference = exports.toHexString = exports.bufferToHexString = exports.toBuffer = exports.add0x = exports.isHexString = exports.remove0x = void 0;var _ethereumjsUtil = require("ethereumjs-util");
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.randomHexString = exports.isReleaseVersion = exports.getHash = exports.forwardBytesDifference = exports.toHexString = exports.bufferToHexString = exports.toBuffer = exports.add0x = exports.isHexString = exports.remove0x = void 0;var _ethereumjsUtil = require("ethereumjs-util");
 var _crypto = _interopRequireDefault(require("crypto"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 const remove0x = str => str && str.substring(0, 2) === '0x' ? str.substring(2) : str;exports.remove0x = remove0x;
@@ -34,7 +34,7 @@ const toHexString = stringOrBuffer => {
   return add0x(str);
 };exports.toHexString = toHexString;
 
-const fordwardBytesDifference = (a, b) => {
+const forwardBytesDifference = (a, b) => {
   if (a === null || b === null) return null;
   a = toBuffer(a, 'utf8');
   b = toBuffer(b, 'utf8');
@@ -45,7 +45,7 @@ const fordwardBytesDifference = (a, b) => {
     difference = difference.slice(1);
   }
   return difference;
-};exports.fordwardBytesDifference = fordwardBytesDifference;
+};exports.forwardBytesDifference = forwardBytesDifference;
 
 const getHash = (value, encoding = 'hex') => toHexString((0, _ethereumjsUtil.keccak256)(toBuffer(value, encoding)));exports.getHash = getHash;
 
