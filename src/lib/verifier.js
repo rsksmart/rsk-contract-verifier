@@ -74,7 +74,7 @@ export function verifyResults (bytecode, evm, deployedBytecode, libs) {
   let { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(bytecode)
   let evmBytecode = evm.bytecode.object
   const usedLibraries = getUsedLibraries(evmBytecode, libs)
-  if (libs) evmBytecode = linker.link(evmBytecode, addPrefixToLibraries(libs))
+  if (libs) evmBytecode = linker.link(evmBytecode, addPrefixToLibraries(libs, evmBytecode))
   let { bytecode: resultBytecode } = extractMetadataFromBytecode(evmBytecode)
 
   /**
@@ -98,21 +98,18 @@ export function verifyResults (bytecode, evm, deployedBytecode, libs) {
   return { resultBytecode, orgBytecode, metadata, usedLibraries }
 }
 
-function addLibraryPrefix (lib) {
-  return `${KEY}:${lib}`
-}
-
 function removeLibraryPrefix (lib) {
   const [prefix, name] = lib.split(':')
-  return (prefix === KEY) ? name : lib
+  return (prefix && name) ? name : lib
 }
 
-function addPrefixToLibraries (libraries) {
+function addPrefixToLibraries (libraries, bytecode) {
   if (!libraries || Array.isArray(libraries)) return
   const libs = {}
-  for (let lib in libraries) {
-    const name = addLibraryPrefix(lib)
-    libs[name] = libraries[lib]
+  const bytecodeLibs = linker.find(bytecode)
+  for (let lib in bytecodeLibs) {
+    const name = removeLibraryPrefix(lib)
+    libs[lib] = libraries[name]
   }
   return libs
 }
