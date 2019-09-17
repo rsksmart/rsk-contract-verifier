@@ -21,7 +21,7 @@ describe(`# utils`, function () {
     }
   })
 
-  describe(`fordwardBytesDifference()`, function () {
+  describe(`forwardBytesDifference()`, function () {
     const test = [
       ['', '', Buffer.from('')],
       ['abcde', 'ab', Buffer.from('cde')],
@@ -34,7 +34,7 @@ describe(`# utils`, function () {
       const [a, b, expected] = t
       it(`${a} - ${b} should be ${(expected) ? expected.toString() : expected}`, () => {
 
-        const difference = utils.fordwardBytesDifference(a, b)
+        const difference = utils.forwardBytesDifference(a, b)
         expect(Buffer.isBuffer(difference) || difference === null).equals(true)
         if (difference !== null) expect(difference).to.equalBytes(expected)
       })

@@ -34,7 +34,7 @@ export const toHexString = stringOrBuffer => {
   return add0x(str)
 }
 
-export const fordwardBytesDifference = (a, b) => {
+export const forwardBytesDifference = (a, b) => {
   if (a === null || b === null) return null
   a = toBuffer(a, 'utf8')
   b = toBuffer(b, 'utf8')
