@@ -99,15 +99,20 @@ export function verifyResults (bytecode, evm, deployedBytecode, libs) {
     const deployedBytecodeResult = extractMetadataFromBytecode(deployedBytecode)
     metadata = deployedBytecodeResult.metadata
     // remove metadata from original bytecode searching extracted metadata
-    orgBytecode = bytecode.substr(0, bytecode.indexOf(metadata))
+    orgBytecode = removeMetadata(bytecode, metadata)
     // extract metadata from compiled deployed bytecode
     const { metadata: compiledMetadata } = extractMetadataFromBytecode(evm.deployedBytecode.object)
     // remove metadata from compiled bytecode using extracted metadata
     resultBytecode = add0x(evm.bytecode.object)
-    resultBytecode = resultBytecode.substr(0, resultBytecode.indexOf(compiledMetadata))
+    resultBytecode = removeMetadata(resultBytecode, compiledMetadata)
   }
 
   return { resultBytecode, orgBytecode, metadata, usedLibraries }
+}
+
+function removeMetadata (bytecode, metadata) {
+  const metadataStart = bytecode.indexOf(metadata)
+  return (metadataStart > 0) ? bytecode.substr(0, metadataStart) : bytecode
 }
 
 function removeLibraryPrefix (lib) {

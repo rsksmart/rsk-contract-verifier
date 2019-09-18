@@ -4,5 +4,6 @@ import RIF from './RIF.json'
 import RIFF from './RIF-FLAT.json'
 import ADDRESS_LINKER from './AddressLinker.json'
 import CUCKOO from './cuckoo.json'
-
-export default { ERC20, ERC721, RIF, RIFF, ADDRESS_LINKER, CUCKOO }
+import RESOLVER from './MultiChainResolver.json'
+import REGISTRAR from './Registrar.json'
+export default { ERC20, ERC721, RIF, RIFF, ADDRESS_LINKER, CUCKOO, RESOLVER, REGISTRAR }
