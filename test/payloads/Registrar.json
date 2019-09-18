@@ -8,6 +8,106 @@
   },
   "version": "0.4.25+commit.59dbf8f1",
   "name": "TokenRegistrar",
+  "_expected": {
+    "warnings": [
+      {
+        "component": "general",
+        "formattedMessage": "common/RNS.sol:102:33: Warning: This declaration shadows an existing declaration.\n    function setDefaultResolver(address resolver) public only_owner(0) {\n                                ^--------------^\ncommon/RNS.sol:40:5: The shadowed declaration is here:\n    function resolver(bytes32 node) public view returns (address) {\n    ^ (Relevant source part starts here and spans across multiple lines).\n\n",
+        "message": "This declaration shadows an existing declaration.",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 3116,
+          "file": "common/RNS.sol",
+          "start": 3100
+        },
+        "type": "Warning"
+      },
+      {
+        "component": "general",
+        "formattedMessage": "tokens/ERC677TokenContract.sol:21:9: Warning: Invoking events without \"emit\" prefix is deprecated.\n        Transfer(msg.sender, to, value, data);\n        ^-----------------------------------^\n",
+        "message": "Invoking events without \"emit\" prefix is deprecated.",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 739,
+          "file": "tokens/ERC677TokenContract.sol",
+          "start": 702
+        },
+        "type": "Warning"
+      },
+      {
+        "component": "general",
+        "formattedMessage": "TokenDeed.sol:12:46: Warning: This looks like an address but has an invalid checksum. If this is not used as an address, please prepend '00'. Correct checksummed address: '0xE594DF49AA7a13ccdD2dB3A7917312E02374f744'. For more information please see https://solidity.readthedocs.io/en/develop/types.html#address-literals\n    address constant RESOURCE_POOL_ADDRESS = 0xe594df49aa7a13ccdd2db3a7917312e02374f744;\n                                             ^----------------------------------------^\n",
+        "message": "This looks like an address but has an invalid checksum. If this is not used as an address, please prepend '00'. Correct checksummed address: '0xE594DF49AA7a13ccdD2dB3A7917312E02374f744'. For more information please see https://solidity.readthedocs.io/en/develop/types.html#address-literals",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 365,
+          "file": "TokenDeed.sol",
+          "start": 323
+        },
+        "type": "Warning"
+      },
+      {
+        "component": "general",
+        "formattedMessage": "TokenDeed.sol:179:28: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.\n    function tokenFallback(address from, uint256 amount, bytes data) public returns (bool) {\n                           ^----------^\n",
+        "message": "Unused function parameter. Remove or comment out the variable name to silence this warning.",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 5746,
+          "file": "TokenDeed.sol",
+          "start": 5734
+        },
+        "type": "Warning"
+      },
+      {
+        "component": "general",
+        "formattedMessage": "TokenDeed.sol:179:42: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.\n    function tokenFallback(address from, uint256 amount, bytes data) public returns (bool) {\n                                         ^------------^\n",
+        "message": "Unused function parameter. Remove or comment out the variable name to silence this warning.",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 5762,
+          "file": "TokenDeed.sol",
+          "start": 5748
+        },
+        "type": "Warning"
+      },
+      {
+        "component": "general",
+        "formattedMessage": "TokenDeed.sol:179:58: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.\n    function tokenFallback(address from, uint256 amount, bytes data) public returns (bool) {\n                                                         ^--------^\n",
+        "message": "Unused function parameter. Remove or comment out the variable name to silence this warning.",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 5774,
+          "file": "TokenDeed.sol",
+          "start": 5764
+        },
+        "type": "Warning"
+      },
+      {
+        "component": "general",
+        "formattedMessage": "TokenRegistrar:406:31: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.\n    function payRentWithToken(address _from, uint _tokenQuantity, bytes32 _hash) public {\n                              ^-----------^\n",
+        "message": "Unused function parameter. Remove or comment out the variable name to silence this warning.",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 16608,
+          "file": "TokenRegistrar",
+          "start": 16595
+        },
+        "type": "Warning"
+      },
+      {
+        "component": "general",
+        "formattedMessage": "TokenDeed.sol:179:5: Warning: Function state mutability can be restricted to pure\n    function tokenFallback(address from, uint256 amount, bytes data) public returns (bool) {\n    ^ (Relevant source part starts here and spans across multiple lines).\n",
+        "message": "Function state mutability can be restricted to pure",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 5826,
+          "file": "TokenDeed.sol",
+          "start": 5711
+        },
+        "type": "Warning"
+      }
+    ]
+  },
   "imports": [
     {
       "name": "TokenRegistrar.sol",
