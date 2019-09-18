@@ -6,6 +6,8 @@ import payloads from './payloads/'
 describe(`# Verify from payload`, () => {
   for (let key in payloads) {
     let payload = payloads[key]
+    let _expected = payload._expected || {}
+    let { warnings } = _expected
     describe(`# contract ${key}`, function () {
       this.timeout(20000)
       it('should verify a contract from payload', async () => {
@@ -16,6 +18,7 @@ describe(`# Verify from payload`, () => {
         expect(verification).has.ownProperty('usedSettings')
         expect(verification).has.ownProperty('usedLibraries')
         expect(verification.error).to.be.equal(undefined)
+        expect(verification.warnings).to.be.deep.equal(warnings)
         expect(verification.bytecodeHash, 'hashes').to.be.deep.equal(verification.resultBytecodeHash)
         expect(verification.usedLibraries).to.be.deep.equal(payload.libraries)
       })

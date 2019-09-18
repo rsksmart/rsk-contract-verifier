@@ -1,0 +1,27 @@
+{
+  "_expected": {
+    "warnings": [
+      {
+        "component": "general",
+        "formattedMessage": "cuckoo:5:4: Warning: Invoking events without \"emit\" prefix is deprecated.\n   Log(\"test\");\n   ^---------^\n",
+        "message": "Invoking events without \"emit\" prefix is deprecated.",
+        "severity": "warning",
+        "sourceLocation": {
+          "end": 114,
+          "file": "cuckoo",
+          "start": 103
+        },
+        "type": "Warning"
+      }
+    ]
+  },
+  "name": "cuckoo",
+  "source": "pragma solidity ^0.4.24;\ncontract cuckoo {\nevent Log(string what);\n function renderWord () public {\n   Log(\"test\");\n }\n}",
+  "version": "0.4.24",
+  "settings": {
+    "optimizer": {
+      "enabled": false
+    }
+  },
+  "bytecode": "0x6080604052348015600f57600080fd5b5060ee8061001e6000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063b8c28946146044575b600080fd5b348015604f57600080fd5b5060566058565b005b7fcf34ef537ac33ee1ac626ca1587a0a7e8e51561e5514f8cb36afa1c5102b3bab6040518080602001828103825260048152602001807f746573740000000000000000000000000000000000000000000000000000000081525060200191505060405180910390a15600a165627a7a7230582078e50d6656fe095adbe4bd462d58ff77ccc5cacbca89fa804cd937a762973bd70029"
+}
