@@ -3,7 +3,7 @@ var _linker = _interopRequireDefault(require("./linker"));
 var _utils = require("./utils");
 var _solidityMetadata = require("./solidityMetadata");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
-const KEY = 'CONTRACT_VERIFIER';
+const SEVERITY_WARNING = 'warning';
 
 function Verifier(options = {}) {
   const compiler = (0, _compiler.default)(options);
@@ -13,8 +13,9 @@ function Verifier(options = {}) {
       /** deployedBytecode is optional, used to surf metadata bug
           * if it is provided  the verifier will try to extract the original metadata from it */
       const { version, imports, bytecode, source, deployedBytecode, libraries, name } = payload;
-
       if (!name) throw new Error('Invalid contract name');
+      if (!bytecode) throw new Error(`Invalid bytecode`);
+      const KEY = name;
       resolveImports = resolveImports || compiler.getImports(imports);
       const settings = payload.settings || {};
       let sources = {};
@@ -33,9 +34,9 @@ function Verifier(options = {}) {
       const input = compiler.createInput({ sources, settings });
 
       const result = await compiler.compile(input, { version, resolveImports: updateUsedSources });
-      const { errors, contracts } = result;
-
-      if (errors) return { errors };
+      const { contracts } = result;
+      const { errors, warnings } = filterResultErrors(result);
+      if (errors) return { errors, warnings };
 
       if (!contracts || !contracts[KEY]) throw new Error('Empty compilation result');
       const compiled = contracts[KEY][name];
@@ -60,7 +61,8 @@ function Verifier(options = {}) {
         abi,
         opcodes,
         usedSources,
-        methodIdentifiers };
+        methodIdentifiers,
+        warnings };
 
     } catch (err) {
       return Promise.reject(err);
@@ -68,6 +70,16 @@ function Verifier(options = {}) {
   };
 
   return Object.freeze({ verify, hash: _utils.getHash });
+}
+
+function filterResultErrors({ errors }) {
+  let warnings;
+  if (errors) {
+    warnings = errors.filter(e => e.severity === SEVERITY_WARNING);
+    errors = errors.filter(e => e.severity !== SEVERITY_WARNING);
+    errors = errors.length ? errors : undefined;
+  }
+  return { errors, warnings };
 }
 
 function verifyResults(bytecode, evm, deployedBytecode, libs) {
@@ -87,15 +99,20 @@ function verifyResults(bytecode, evm, deployedBytecode, libs) {
     const deployedBytecodeResult = (0, _solidityMetadata.extractMetadataFromBytecode)(deployedBytecode);
     metadata = deployedBytecodeResult.metadata;
     // remove metadata from original bytecode searching extracted metadata
-    orgBytecode = bytecode.substr(0, bytecode.indexOf(metadata));
+    orgBytecode = removeMetadata(bytecode, metadata);
     // extract metadata from compiled deployed bytecode
     const { metadata: compiledMetadata } = (0, _solidityMetadata.extractMetadataFromBytecode)(evm.deployedBytecode.object);
-    // remove metradata from compiled bytecode using extracted metadata
+    // remove metadata from compiled bytecode using extracted metadata
     resultBytecode = (0, _utils.add0x)(evm.bytecode.object);
-    resultBytecode = resultBytecode.substr(0, resultBytecode.indexOf(compiledMetadata));
+    resultBytecode = removeMetadata(resultBytecode, compiledMetadata);
   }
 
   return { resultBytecode, orgBytecode, metadata, usedLibraries };
+}
+
+function removeMetadata(bytecode, metadata) {
+  const metadataStart = bytecode.indexOf(metadata);
+  return metadataStart > 0 ? bytecode.substr(0, metadataStart) : bytecode;
 }
 
 function removeLibraryPrefix(lib) {
