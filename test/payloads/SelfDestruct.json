@@ -1,0 +1,28 @@
+{
+  "_expected": {
+    "decodedMetadata": [
+      {
+        "bzzr1": "65078fe2091dba2af38af933af5066ae37f1e93ad6acb2e96394045a3e38da17",
+        "solc": "00050b"
+      }
+    ]
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "evmVersion": "byzantium"
+  },
+  "version": "0.5.11+commit.c082d0b4",
+  "name": "SelfDestruct",
+  "imports": [
+    {
+      "name": "selfDestruct.sol",
+      "contents": "pragma solidity ^0.5.0;\n\ncontract SelfDestruct {\n  address private _owner;\n\n  constructor () public {\n      _owner = msg.sender;\n    }\n  function owner() public view returns (address) {\n        return _owner;\n    }\n  function close() public {\n    address payable powner = address(uint160(_owner));\n    selfdestruct(powner);\n  }\n}"
+    }
+  ],
+  "source": "pragma solidity ^0.5.0;\n\ncontract SelfDestruct {\n  address private _owner;\n\n  constructor () public {\n      _owner = msg.sender;\n    }\n  function owner() public view returns (address) {\n        return _owner;\n    }\n  function close() public {\n    address payable powner = address(uint160(_owner));\n    selfdestruct(powner);\n  }\n}",
+  "bytecode": "0x608060405234801561001057600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550610149806100606000396000f3fe608060405234801561001057600080fd5b5060043610610053576000357c01000000000000000000000000000000000000000000000000000000009004806343d726d6146100585780638da5cb5b14610062575b600080fd5b6100606100ac565b005b61006a6100eb565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1690508073ffffffffffffffffffffffffffffffffffffffff16ff5b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1690509056fea265627a7a7231582065078fe2091dba2af38af933af5066ae37f1e93ad6acb2e96394045a3e38da1764736f6c634300050b0032",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b5060043610610053576000357c01000000000000000000000000000000000000000000000000000000009004806343d726d6146100585780638da5cb5b14610062575b600080fd5b6100606100ac565b005b61006a6100eb565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1690508073ffffffffffffffffffffffffffffffffffffffff16ff5b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1690509056fea265627a7a7231582065078fe2091dba2af38af933af5066ae37f1e93ad6acb2e96394045a3e38da1764736f6c634300050b0032"
+}

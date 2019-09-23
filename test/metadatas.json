@@ -1,0 +1,32 @@
+[
+  {
+    "metadata": "a164746573746474657374000b",
+    "decoded": {
+      "test": "test"
+    }
+  },
+  {
+    "metadata": "a1"
+  },
+  {
+    "metadata": "a165627a7a723058205fb59448c6644241ee553549e0418378516927062afdca0d71d7c23f3b584f740029",
+    "decoded": {
+      "bzzr0": "5fb59448c6644241ee553549e0418378516927062afdca0d71d7c23f3b584f74"
+    }
+  },
+  {
+    "metadata": "a3616101616202616303000a",
+    "decoded": {
+      "a": 1,
+      "b": 2,
+      "c": 3
+    }
+  },
+  {
+    "metadata": "a265627a7a7231582065078fe2091dba2af38af933af5066ae37f1e93ad6acb2e96394045a3e38da1764736f6c634300050b0032",
+    "decoded": {
+      "bzzr1": "65078fe2091dba2af38af933af5066ae37f1e93ad6acb2e96394045a3e38da17",
+      "solc": "00050b"
+    }
+  }
+]

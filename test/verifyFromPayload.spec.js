@@ -7,7 +7,6 @@ describe(`# Verify from payload`, () => {
   for (let key in payloads) {
     let payload = payloads[key]
     let _expected = payload._expected || {}
-    let { warnings } = _expected
     describe(`# contract ${key}`, function () {
       this.timeout(20000)
       it('should verify a contract from payload', async () => {
@@ -17,8 +16,11 @@ describe(`# Verify from payload`, () => {
         expect(verification).has.ownProperty('resultBytecodeHash')
         expect(verification).has.ownProperty('usedSettings')
         expect(verification).has.ownProperty('usedLibraries')
+        expect(verification).has.ownProperty('decodedMetadata')
         expect(verification.errors).to.be.equal(undefined)
-        if (warnings) expect(verification.warnings).to.be.deep.equal(warnings)
+        for (let e in _expected) {
+          expect(verification[e]).to.be.deep.equal(_expected[e])
+        }
         expect(verification.bytecodeHash, 'hashes').to.be.deep.equal(verification.resultBytecodeHash)
         expect(verification.usedLibraries).to.be.deep.equal(payload.libraries)
       })
