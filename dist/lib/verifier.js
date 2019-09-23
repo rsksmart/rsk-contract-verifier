@@ -42,7 +42,7 @@ function Verifier(options = {}) {
       const compiled = contracts[KEY][name];
       const { evm, abi } = compiled;
 
-      const { resultBytecode, orgBytecode, metadata, usedLibraries } = verifyResults(bytecode, evm, deployedBytecode, libraries);
+      const { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata } = verifyResults(bytecode, evm, deployedBytecode, libraries);
       if (!resultBytecode) throw new Error('Invalid result ');
       const resultBytecodeHash = (0, _utils.getHash)(resultBytecode);
       const bytecodeHash = (0, _utils.getHash)(orgBytecode);
@@ -62,7 +62,8 @@ function Verifier(options = {}) {
         opcodes,
         usedSources,
         methodIdentifiers,
-        warnings };
+        warnings,
+        decodedMetadata };
 
     } catch (err) {
       return Promise.reject(err);
@@ -83,7 +84,7 @@ function filterResultErrors({ errors }) {
 }
 
 function verifyResults(bytecode, evm, deployedBytecode, libs) {
-  let { bytecode: orgBytecode, metadata } = (0, _solidityMetadata.extractMetadataFromBytecode)(bytecode);
+  let { bytecode: orgBytecode, metadata, decodedMetadata } = (0, _solidityMetadata.extractMetadataFromBytecode)(bytecode);
   let evmBytecode = evm.bytecode.object;
   const usedLibraries = getUsedLibraries(evmBytecode, libs);
   if (libs) evmBytecode = _linker.default.link(evmBytecode, addPrefixToLibraries(libs, evmBytecode));
@@ -98,6 +99,7 @@ function verifyResults(bytecode, evm, deployedBytecode, libs) {
     // extract metadata from original deployed bytecode
     const deployedBytecodeResult = (0, _solidityMetadata.extractMetadataFromBytecode)(deployedBytecode);
     metadata = deployedBytecodeResult.metadata;
+    decodedMetadata = deployedBytecodeResult.decodedMetadata;
     // remove metadata from original bytecode searching extracted metadata
     orgBytecode = removeMetadata(bytecode, metadata);
     // extract metadata from compiled deployed bytecode
@@ -107,7 +109,7 @@ function verifyResults(bytecode, evm, deployedBytecode, libs) {
     resultBytecode = removeMetadata(resultBytecode, compiledMetadata);
   }
 
-  return { resultBytecode, orgBytecode, metadata, usedLibraries };
+  return { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata };
 }
 
 function removeMetadata(bytecode, metadata) {

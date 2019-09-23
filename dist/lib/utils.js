@@ -1,7 +1,7 @@
 "use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.randomHexString = exports.isReleaseVersion = exports.getHash = exports.forwardBytesDifference = exports.toHexString = exports.bufferToHexString = exports.toBuffer = exports.add0x = exports.isHexString = exports.remove0x = void 0;var _ethereumjsUtil = require("ethereumjs-util");
 var _crypto = _interopRequireDefault(require("crypto"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
-const remove0x = str => str && str.substring(0, 2) === '0x' ? str.substring(2) : str;exports.remove0x = remove0x;
+const remove0x = str => typeof str === 'string' && `${str}`.substring(0, 2) === '0x' ? str.substring(2) : str;exports.remove0x = remove0x;
 
 const isHexString = str => {
   if (str === undefined || str === null) return str;
@@ -11,6 +11,7 @@ const isHexString = str => {
 };exports.isHexString = isHexString;
 
 const add0x = str => {
+  if (typeof str !== 'string') return str;
   let s = str;
   let prefix = s[0] === '-' ? '-' : '';
   if (prefix) s = s.substring(prefix.length);

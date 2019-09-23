@@ -1,6 +1,6 @@
 {
   "name": "rsk-contract-verifier",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Smart contract source code verifier",
   "main": "",
   "scripts": {
