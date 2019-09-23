@@ -1,7 +1,7 @@
 import { keccak256 } from 'ethereumjs-util'
 import crypto from 'crypto'
 
-export const remove0x = str => (str && str.substring(0, 2) === '0x') ? str.substring(2) : str
+export const remove0x = str => (typeof str === 'string' && `${str}`.substring(0, 2) === '0x') ? str.substring(2) : str
 
 export const isHexString = str => {
   if (str === undefined || str === null) return str
@@ -11,6 +11,7 @@ export const isHexString = str => {
 }
 
 export const add0x = str => {
+  if (typeof str !== 'string') return str
   let s = str
   let prefix = (s[0] === '-') ? '-' : ''
   if (prefix) s = s.substring(prefix.length)
