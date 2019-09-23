@@ -1,34 +1,35 @@
 import { expect } from 'chai'
-import { decodeMetadata, isValidMetadata, extractMetadataFromBytecode } from '../src/lib/solidityMetadata'
+import { decodeMetadata, isValidMetadataLength, extractMetadataFromBytecode } from '../src/lib/solidityMetadata'
 import { truffleContracts } from './contracts'
+import metadatas from './metadatas.json'
 
 const contracts = truffleContracts()
 
 describe(`# solidityMetadata`, function () {
   const metadata = 'a165627a7a723058205fb59448c6644241ee553549e0418378516927062afdca0d71d7c23f3b584f740029'
-  describe(`isValidMetadata()`, function () {
+  describe(`isValidMetadataLength()`, function () {
     const test = [
       ['a1650011223344556677000a', true],
       ['a16500112233445566778899001a', false],
-      ['a16600112233445566778899000a', false],
-      [metadata, true]
-    ]
+      ['a16600112233445566778899000a', false]
+    ].concat(metadatas.map(m => [m.metadata, !!m.decoded]))
 
     for (let t of test) {
       const [value, expected] = t
       it(`${value} should return ${expected}`, () => {
-        expect(isValidMetadata(value)).to.be.equal(expected)
+        expect(isValidMetadataLength(value)).to.be.equal(expected)
       })
     }
   })
 
   describe(`decodeMetadata()`, function () {
-    it(`should decode metadata`, () => {
-      const decoded = decodeMetadata(metadata)
-      expect(decoded).to.be.an('object')
-      expect(decoded).has.ownProperty('bzzr0')
-      expect(decoded.bzzr0).to.be.equal('5fb59448c6644241ee553549e0418378516927062afdca0d71d7c23f3b584f74')
-    })
+    for (let m of metadatas) {
+      const { metadata, decoded } = m
+      it(`should decode metadata`, () => {
+        const result = decodeMetadata(metadata)
+        expect(result).to.be.deep.equal(decoded)
+      })
+    }
   })
 
   describe(`extractMetadataFromBytecode()`, function () {

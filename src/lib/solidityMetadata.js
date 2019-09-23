@@ -1,53 +1,69 @@
 import { toBuffer, toHexString, remove0x } from './utils'
 import cbor from 'cbor'
 
-const METADATA_START = 'a165'
-
-export const startAsMetadata = metadata => `${metadata}`.substr(0, 4) === METADATA_START
-
-export const getMetadataLength = (bytecode, metadataLen = 0) => {
+export const getMetadataLength = bytecode => {
   bytecode = toBuffer(bytecode)
-  return bytecode.readUInt16BE(bytecode.length - 2)
+  const pos = bytecode.length - 2
+  if (pos > 0) return bytecode.readUInt16BE(pos)
 }
 
-export const getMetadata = (bytecode, metadata) => {
+export const getMetadata = (bytecode, metadataList) => {
   bytecode = toBuffer(bytecode)
+  metadataList = metadataList || []
   let metaDataStart = bytecode.length - getMetadataLength(bytecode) - 2
   if (metaDataStart >= 0 && metaDataStart <= bytecode.length) {
     let newMetadata = bytecode.slice(metaDataStart, bytecode.length)
-    if (startAsMetadata(newMetadata.toString('hex'))) {
-      metadata = (metadata) ? Buffer.concat([newMetadata, metadata]) : newMetadata
+    if (isValidMetadataLength(newMetadata)) {
+      metadataList.push(newMetadata)
       bytecode = bytecode.slice(0, metaDataStart)
-      return getMetadata(bytecode, metadata)
+      return getMetadata(bytecode, metadataList)
     }
   }
-  return (metadata) ? metadata.toString('hex') : metadata
+  let metadata, decodedMetadata
+  if (metadataList.length) {
+    metadataList = metadataList.reverse()
+    decodedMetadata = metadataList.map(function (m) { return isValidMetadata(m) })
+    if (!decodedMetadata.includes(false)) {
+      metadata = Buffer.concat(metadataList).toString('hex')
+    }
+  }
+  return { metadata, decodedMetadata }
 }
 
-export const isValidMetadata = metadata => {
-  if (!startAsMetadata(metadata)) return false
+export const isValidMetadataLength = metadata => {
+  if (!metadata) return false
   metadata = toBuffer(metadata)
   const len = getMetadataLength(metadata)
   return len === metadata.length - 2
 }
 
+export const isValidMetadata = metadata => {
+  if (isValidMetadataLength(metadata)) {
+    const decoded = decodeMetadata(metadata)
+    return (typeof decoded === 'object') ? decoded : false
+  }
+}
+
 export const extractMetadataFromBytecode = (bytecodeStringOrBuffer) => {
   const buffer = toBuffer(bytecodeStringOrBuffer)
   let bytecode = toHexString(bytecodeStringOrBuffer)
-  let metadata = getMetadata(buffer)
+  const { metadata, decodedMetadata } = getMetadata(buffer)
   if (metadata) {
     bytecode = buffer.slice(0, buffer.length - metadata.length)
   }
-  return { bytecode, metadata }
+  return { bytecode, metadata, decodedMetadata }
 }
 
 export const decodeMetadata = metadata => {
-  if (!isValidMetadata(metadata)) return
-  const decoded = cbor.decode(metadata)
-  if (typeof decoded !== 'object') return
-  for (let p in decoded) {
-    const value = remove0x(toHexString(decoded[p]))
-    decoded[p] = value
+  try {
+    if (!isValidMetadataLength(metadata)) throw (new Error('Invalid length'))
+    const decoded = cbor.decode(metadata)
+    if (typeof decoded !== 'object') throw (new Error('Decode fail'))
+    for (let p in decoded) {
+      decoded[p] = remove0x(toHexString(decoded[p]))
+    }
+    return decoded
+  } catch (err) {
+    return undefined
   }
-  return decoded
 }
