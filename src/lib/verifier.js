@@ -42,7 +42,7 @@ function Verifier (options = {}) {
       const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
 
-      const { resultBytecode, orgBytecode, metadata, usedLibraries } = verifyResults(bytecode, evm, deployedBytecode, libraries)
+      const { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata } = verifyResults(bytecode, evm, deployedBytecode, libraries)
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
@@ -62,7 +62,8 @@ function Verifier (options = {}) {
         opcodes,
         usedSources,
         methodIdentifiers,
-        warnings
+        warnings,
+        decodedMetadata
       }
     } catch (err) {
       return Promise.reject(err)
@@ -83,7 +84,7 @@ function filterResultErrors ({ errors }) {
 }
 
 export function verifyResults (bytecode, evm, deployedBytecode, libs) {
-  let { bytecode: orgBytecode, metadata } = extractMetadataFromBytecode(bytecode)
+  let { bytecode: orgBytecode, metadata, decodedMetadata } = extractMetadataFromBytecode(bytecode)
   let evmBytecode = evm.bytecode.object
   const usedLibraries = getUsedLibraries(evmBytecode, libs)
   if (libs) evmBytecode = linker.link(evmBytecode, addPrefixToLibraries(libs, evmBytecode))
@@ -98,6 +99,7 @@ export function verifyResults (bytecode, evm, deployedBytecode, libs) {
     // extract metadata from original deployed bytecode
     const deployedBytecodeResult = extractMetadataFromBytecode(deployedBytecode)
     metadata = deployedBytecodeResult.metadata
+    decodedMetadata = deployedBytecodeResult.decodedMetadata
     // remove metadata from original bytecode searching extracted metadata
     orgBytecode = removeMetadata(bytecode, metadata)
     // extract metadata from compiled deployed bytecode
@@ -107,7 +109,7 @@ export function verifyResults (bytecode, evm, deployedBytecode, libs) {
     resultBytecode = removeMetadata(resultBytecode, compiledMetadata)
   }
 
-  return { resultBytecode, orgBytecode, metadata, usedLibraries }
+  return { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata }
 }
 
 function removeMetadata (bytecode, metadata) {
