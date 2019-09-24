@@ -27,18 +27,18 @@
   "dependencies": {
     "axios": "^0.19.0",
     "bunyan": "^2.0.2",
-    "cbor": "^4.1.5",
+    "cbor": "^4.3.0",
     "ethereumjs-util": "^6.1.0",
     "require-from-string": "^2.0.2",
-    "socket.io": "^2.2.0",
-    "solc": "^0.5.9"
+    "socket.io": "^2.3.0",
+    "solc": "^0.5.11"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.0",
-    "@babel/core": "^7.5.0",
-    "@babel/node": "^7.5.0",
-    "@babel/preset-env": "^7.5.0",
-    "@babel/register": "^7.4.4",
+    "@babel/cli": "^7.6.2",
+    "@babel/core": "^7.6.2",
+    "@babel/node": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/register": "^7.6.2",
     "chai": "^4.2.0",
     "chai-bytes": "^0.1.2",
     "eslint": "^4.19.1",
