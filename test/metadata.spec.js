@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { decodeMetadata, isValidMetadataLength, extractMetadataFromBytecode } from '../src/lib/solidityMetadata'
+import { decodeMetadata, isValidMetadataLength, extractMetadataFromBytecode, removeEmptyBytesFromBytecodeEnd } from '../src/lib/solidityMetadata'
 import { truffleContracts } from './contracts'
 import metadatas from './metadatas.json'
 
@@ -20,6 +20,17 @@ describe(`# solidityMetadata`, function () {
         expect(isValidMetadataLength(value)).to.be.equal(expected)
       })
     }
+  })
+
+  describe(`removeEmptyBytesFromBytecodeEnd()`, function () {
+    const test = v => removeEmptyBytesFromBytecodeEnd(v).toString('hex')
+    it(`should remove empty bytes from end`, () => {
+      expect(test('00290000')).to.be.equal('0029')
+      expect(test('002900')).to.be.equal('002900')
+      expect(test('003910')).to.be.equal('003910')
+      expect(test('0049000000000000000000000000')).to.be.equal('0049')
+      expect(test('00290000000000000000000000000000000000000000000000000000000000000000')).to.be.equal('0029')
+    })
   })
 
   describe(`decodeMetadata()`, function () {

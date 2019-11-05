@@ -7,6 +7,14 @@ export const getMetadataLength = bytecode => {
   if (pos > 0) return bytecode.readUInt16BE(pos)
 }
 
+export const removeEmptyBytesFromBytecodeEnd = (bytecode) => {
+  bytecode = Buffer.from([...toBuffer(bytecode)])
+  while (getMetadataLength(bytecode) === 0) {
+    bytecode = bytecode.slice(0, bytecode.length - 2)
+  }
+  return bytecode
+}
+
 export const getMetadata = (bytecode, metadataList) => {
   bytecode = toBuffer(bytecode)
   metadataList = metadataList || []
@@ -45,11 +53,11 @@ export const isValidMetadata = metadata => {
 }
 
 export const extractMetadataFromBytecode = (bytecodeStringOrBuffer) => {
-  const buffer = toBuffer(bytecodeStringOrBuffer)
+  const buffer = removeEmptyBytesFromBytecodeEnd(bytecodeStringOrBuffer)
   let bytecode = toHexString(bytecodeStringOrBuffer)
   const { metadata, decodedMetadata } = getMetadata(buffer)
   if (metadata) {
-    bytecode = buffer.slice(0, buffer.length - metadata.length)
+    bytecode = toHexString(buffer.slice(0, buffer.length - metadata.length))
   }
   return { bytecode, metadata, decodedMetadata }
 }
