@@ -13,5 +13,11 @@ jobs:
             cd ~/tpm/
             npm i
       - run:
+          name: build
+          command: npm run build
+      - run:
+          name: 'cache solc'
+          command: node dist/tools/cacheSolcVersions.js true
+      - run:
           name: Run Tests
           command: npm test
