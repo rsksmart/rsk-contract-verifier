@@ -4,7 +4,8 @@ var _solc = _interopRequireDefault(require("solc"));
 var _path = _interopRequireDefault(require("path"));
 var _fs = _interopRequireDefault(require("fs"));
 var _util = require("util");
-var _utils = require("./utils");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _utils = require("./utils");
+var _defaultConfig = _interopRequireDefault(require("./defaultConfig"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 const writeFile = (0, _util.promisify)(_fs.default.writeFile);
 const readFile = (0, _util.promisify)(_fs.default.readFile);
 const getStat = (0, _util.promisify)(_fs.default.stat);
@@ -13,7 +14,7 @@ function GetSolc({ solcCache, solcUrl, listUrl }) {
   solcUrl = solcUrl || 'https://ethereum.github.io/solc-bin/bin';
   listUrl = listUrl || `${solcUrl}/list.json`;
 
-  const DIR = solcCache || '/tmp/solc';
+  const DIR = solcCache || _defaultConfig.default.solcCache;
   let versionsList;
 
   if (!_fs.default.existsSync(DIR)) {
@@ -65,6 +66,7 @@ function GetSolc({ solcCache, solcUrl, listUrl }) {
     try {
       const code = await downloadVersion(fileName, hash);
       await writeFile(getFilePath(fileName), code);
+      return code;
     } catch (err) {
       return Promise.reject(err);
     }

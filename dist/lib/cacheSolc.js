@@ -1,9 +1,4 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.cacheSolc = cacheSolc;var _getSolc = _interopRequireDefault(require("../lib/getSolc"));
-var _config = _interopRequireDefault(require("../lib/config"));
-var _Logger = _interopRequireDefault(require("../lib/Logger"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
-const log = (0, _Logger.default)(process.argv[1]);
-
-cacheSolc(_config.default, { log });
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.cacheSolc = cacheSolc;exports.default = void 0;var _getSolc = _interopRequireDefault(require("./getSolc"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 async function cacheSolc(config, { releasesOnly, log } = {}) {
   try {
@@ -22,4 +17,6 @@ async function cacheSolc(config, { releasesOnly, log } = {}) {
   } catch (err) {
     return Promise.reject(err);
   }
-}
+}var _default =
+
+cacheSolc;exports.default = _default;

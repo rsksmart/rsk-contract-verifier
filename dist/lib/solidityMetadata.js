@@ -1,4 +1,4 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.decodeMetadata = exports.extractMetadataFromBytecode = exports.isValidMetadata = exports.isValidMetadataLength = exports.getMetadata = exports.getMetadataLength = void 0;var _utils = require("./utils");
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.decodeMetadata = exports.extractMetadataFromBytecode = exports.isValidMetadata = exports.isValidMetadataLength = exports.getMetadata = exports.removeEmptyBytesFromBytecodeEnd = exports.getMetadataLength = void 0;var _utils = require("./utils");
 var _cbor = _interopRequireDefault(require("cbor"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 const getMetadataLength = bytecode => {
@@ -6,6 +6,14 @@ const getMetadataLength = bytecode => {
   const pos = bytecode.length - 2;
   if (pos > 0) return bytecode.readUInt16BE(pos);
 };exports.getMetadataLength = getMetadataLength;
+
+const removeEmptyBytesFromBytecodeEnd = bytecode => {
+  bytecode = Buffer.from([...(0, _utils.toBuffer)(bytecode)]);
+  while (getMetadataLength(bytecode) === 0) {
+    bytecode = bytecode.slice(0, bytecode.length - 2);
+  }
+  return bytecode;
+};exports.removeEmptyBytesFromBytecodeEnd = removeEmptyBytesFromBytecodeEnd;
 
 const getMetadata = (bytecode, metadataList) => {
   bytecode = (0, _utils.toBuffer)(bytecode);
@@ -45,11 +53,11 @@ const isValidMetadata = metadata => {
 };exports.isValidMetadata = isValidMetadata;
 
 const extractMetadataFromBytecode = bytecodeStringOrBuffer => {
-  const buffer = (0, _utils.toBuffer)(bytecodeStringOrBuffer);
+  const buffer = removeEmptyBytesFromBytecodeEnd(bytecodeStringOrBuffer);
   let bytecode = (0, _utils.toHexString)(bytecodeStringOrBuffer);
   const { metadata, decodedMetadata } = getMetadata(buffer);
   if (metadata) {
-    bytecode = buffer.slice(0, buffer.length - metadata.length);
+    bytecode = (0, _utils.toHexString)(buffer.slice(0, buffer.length - metadata.length));
   }
   return { bytecode, metadata, decodedMetadata };
 };exports.extractMetadataFromBytecode = extractMetadataFromBytecode;
