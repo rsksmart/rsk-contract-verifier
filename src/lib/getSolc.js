@@ -5,6 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import { promisify } from 'util'
 import { getHash, isReleaseVersion } from './utils'
+import defaultConfig from './defaultConfig'
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
 const getStat = promisify(fs.stat)
@@ -13,7 +14,7 @@ export function GetSolc ({ solcCache, solcUrl, listUrl }) {
   solcUrl = solcUrl || 'https://ethereum.github.io/solc-bin/bin'
   listUrl = listUrl || `${solcUrl}/list.json`
 
-  const DIR = solcCache || '/tmp/solc'
+  const DIR = solcCache || defaultConfig.solcCache
   let versionsList
 
   if (!fs.existsSync(DIR)) {
@@ -65,6 +66,7 @@ export function GetSolc ({ solcCache, solcUrl, listUrl }) {
     try {
       const code = await downloadVersion(fileName, hash)
       await writeFile(getFilePath(fileName), code)
+      return code
     } catch (err) {
       return Promise.reject(err)
     }

@@ -31,14 +31,11 @@ function Compiler ({ solcCache } = {}) {
 
   const getSnapshot = async version => {
     try {
-      let snapshot = await loadVersion(version)
+      let snapshot = await getSolc.load(version)
       return snapshot
     } catch (err) {
       return Promise.reject(err)
     }
-  }
-  const loadVersion = version => {
-    return getSolc.load(version)
   }
 
   const compile = async (input, { version, resolveImports } = {}) => {
