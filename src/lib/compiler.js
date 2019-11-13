@@ -16,6 +16,12 @@ function Compiler ({ solcCache } = {}) {
         ]
       }
     }
+    const { optimizer } = settings
+    if (optimizer) {
+      let { runs } = optimizer
+      runs = (runs) ? parseInt(runs) : 200
+      settings.optimizer.runs = runs
+    }
     return {
       language: 'Solidity',
       sources,
