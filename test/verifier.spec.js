@@ -21,10 +21,12 @@ function testContract (contractName, useDeployedByteCode) {
       it(`should verify a contract`, async () => {
         deployedBytecode = (useDeployedByteCode) ? deployedBytecode : undefined
         const verification = await verifier.verify({ source, imports: contracts, version, bytecode, deployedBytecode, name: contractName })
-        expect(verification, 'verifification should be an object').to.be.an('object')
+        expect(verification, 'verification should be an object').to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')
         expect(verification).has.ownProperty('bytecode')
+        expect(verification).has.ownProperty('usedSources')
+        expect(verification.usedSources.length).to.not.be.equal(Object.keys(contracts).length)
         expect(typeof verification.bytecode).to.be.equal('string')
         expect(verification).has.ownProperty('resultBytecode')
         expect(typeof verification.resultBytecode).to.be.equal('string')

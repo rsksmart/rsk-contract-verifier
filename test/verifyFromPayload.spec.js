@@ -8,7 +8,7 @@ describe(`# Verify from payload`, () => {
     let payload = payloads[key]
     let _expected = payload._expected || {}
     describe(`# contract ${key}`, function () {
-      this.timeout(20000)
+      this.timeout(60000)
       it('should verify a contract from payload', async () => {
         const verification = await verifyParams(payload)
         expect(verification).to.be.an('object')
