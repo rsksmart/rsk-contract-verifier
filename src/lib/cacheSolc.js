@@ -1,9 +1,4 @@
-import GetSolc from '../lib/getSolc'
-import config from '../lib/config'
-import Logger from '../lib/Logger'
-const log = Logger(process.argv[1])
-
-cacheSolc(config, { log })
+import GetSolc from './getSolc'
 
 export async function cacheSolc (config, { releasesOnly, log } = {}) {
   try {
@@ -23,3 +18,5 @@ export async function cacheSolc (config, { releasesOnly, log } = {}) {
     return Promise.reject(err)
   }
 }
+
+export default cacheSolc
