@@ -5,13 +5,13 @@
   "main": "",
   "scripts": {
     "dev": "npx nodemon src/contract-verifier-api.js | npx bunyan -o short",
-    "build": "npm run clean && npx babel src -d dist --copy-files",
+    "build": "npm run clean && npm run lint && npx babel src -d dist --copy-files",
     "clean": "rm -rf dist",
     "md": "mkdir dist",
     "lint": "npx eslint src/**/*",
     "test": "npx mocha",
     "test-file": "npx mocha --opts ./test/singleFile.opts",
-    "cache-solc": "node dist/tools/cacheSolc.js | npx bunyan "
+    "cache-solc": "node dist/tools/cacheSolcVersions.js | npx bunyan "
   },
   "repository": {
     "type": "git",
