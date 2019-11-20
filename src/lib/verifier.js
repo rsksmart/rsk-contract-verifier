@@ -47,7 +47,7 @@ function Verifier (options = {}) {
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
       const opcodes = evm.bytecode.opcodes
-      const { methodIdentifiers } = evm
+      const methodIdentifiers = Object.entries(evm.methodIdentifiers || {})
       const usedSettings = resultSettings(compiled)
       return {
         name,
