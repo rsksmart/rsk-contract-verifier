@@ -22,7 +22,6 @@ describe(`# Verify from payload`, () => {
           expect(verification[e]).to.be.deep.equal(_expected[e])
         }
         expect(verification.bytecodeHash, 'hashes').to.be.deep.equal(verification.resultBytecodeHash)
-        expect(verification.usedLibraries).to.be.deep.equal(payload.libraries)
       })
     })
   }

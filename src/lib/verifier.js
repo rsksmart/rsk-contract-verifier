@@ -42,10 +42,11 @@ function Verifier (options = {}) {
       const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
 
-      const { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata } = verifyResults(bytecode, evm, deployedBytecode, libraries)
+      const { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata } = verifyResults(KEY, bytecode, evm, deployedBytecode, libraries)
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
+
       const opcodes = evm.bytecode.opcodes
       const methodIdentifiers = Object.entries(evm.methodIdentifiers || {})
       const usedSettings = resultSettings(compiled)
@@ -83,11 +84,12 @@ function filterResultErrors ({ errors }) {
   return { errors, warnings }
 }
 
-export function verifyResults (bytecode, evm, deployedBytecode, libs) {
+export function verifyResults (contractName, bytecode, evm, deployedBytecode, libs) {
   let { bytecode: orgBytecode, metadata, decodedMetadata } = extractMetadataFromBytecode(bytecode)
   let evmBytecode = evm.bytecode.object
-  const usedLibraries = getUsedLibraries(evmBytecode, libs)
-  if (libs) evmBytecode = linker.link(evmBytecode, addPrefixToLibraries(libs, evmBytecode))
+  const { usedLibraries, linkLibraries } = parseLibraries(libs, evmBytecode, contractName)
+
+  if (Object.keys(linkLibraries).length > 0) evmBytecode = linker.link(evmBytecode, linkLibraries)
   let { bytecode: resultBytecode } = extractMetadataFromBytecode(evmBytecode)
 
   /**
@@ -105,7 +107,8 @@ export function verifyResults (bytecode, evm, deployedBytecode, libs) {
     // extract metadata from compiled deployed bytecode
     const { metadata: compiledMetadata } = extractMetadataFromBytecode(evm.deployedBytecode.object)
     // remove metadata from compiled bytecode using extracted metadata
-    resultBytecode = add0x(evm.bytecode.object)
+    // resultBytecode = add0x(evm.bytecode.object)
+    resultBytecode = add0x(evmBytecode)
     resultBytecode = removeMetadata(resultBytecode, compiledMetadata)
   }
 
@@ -122,30 +125,51 @@ function removeLibraryPrefix (lib) {
   return (prefix && name) ? name : lib
 }
 
-function addPrefixToLibraries (libraries, bytecode) {
-  if (!libraries || Array.isArray(libraries)) return
-  const libs = {}
-  const bytecodeLibs = linker.find(bytecode)
-  for (let lib in bytecodeLibs) {
-    const name = removeLibraryPrefix(lib)
-    libs[lib] = libraries[name]
+function getLibrariesPlaceHolders (libraries, prefix) {
+  const placeholders = {}
+
+  const addLibraryPlaceHolder = (name, address, key) => {
+    let library = linker.libraryHashPlaceholder(key)
+    placeholders[library] = { name, address, library }
   }
-  return libs
+
+  for (let name in libraries) {
+    let address = libraries[name]
+    addLibraryPlaceHolder(name, address, name)
+    addLibraryPlaceHolder(name, address, `${prefix}:${name}`)
+  }
+  return placeholders
 }
 
-function getUsedLibraries (bytecode, libraries) {
-  const used = Object.keys(linker.find(bytecode))
-    .map(name => removeLibraryPrefix(name))
-  if (used.length) {
-    const usedLibraries = {}
-    for (let name of used) {
-      let address = libraries[name]
-      if (address) {
-        usedLibraries[name] = address
-      }
-    }
-    return usedLibraries
+function findLibrary (key, prefix, libraries) {
+  if (typeof libraries !== 'object') throw new Error('Libraries must be an object')
+  let name = removeLibraryPrefix(key)
+  let address = libraries[name]
+  let library = key
+  if (!address) {
+    let placeholders = getLibrariesPlaceHolders(libraries, prefix)
+    if (placeholders[key]) return placeholders[key]
   }
+  return { address, library, name }
+}
+
+function parseLibraries (libraries, bytecode, prefix) {
+  const bytecodeLibs = linker.find(bytecode)
+  const libs = []
+  for (let key in bytecodeLibs) {
+    libs.push(findLibrary(key, prefix, libraries))
+  }
+  let linkLibraries = libs.reduce((v, a) => {
+    let { address, library } = a
+    if (address) v[library] = address
+    return v
+  }, {})
+  let usedLibraries = libs.reduce((v, a, i) => {
+    let { name, library, address } = a
+    v[name || library || i] = address
+    return v
+  }, {})
+  return { usedLibraries, linkLibraries }
 }
 
 function resultSettings (compiled) {

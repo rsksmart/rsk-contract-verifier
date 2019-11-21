@@ -8,4 +8,6 @@ import RESOLVER from './MultiChainResolver.json'
 import REGISTRAR from './Registrar.json'
 import SELF_DESTRUCT from './SelfDestruct.json'
 import HW_OPTIMIZED from './helloWorld.optimized.json'
-export default { ERC20, ERC721, RIF, RIFF, ADDRESS_LINKER, CUCKOO, RESOLVER, REGISTRAR, SELF_DESTRUCT, HW_OPTIMIZED }
+import FIFSREGISTRAR from './FIFSRegistrar.json'
+export default { ERC20, ERC721, RIF, RIFF, ADDRESS_LINKER, CUCKOO, RESOLVER, REGISTRAR, SELF_DESTRUCT, HW_OPTIMIZED, FIFSREGISTRAR }
+
