@@ -87,9 +87,13 @@ function filterResultErrors ({ errors }) {
 export function verifyResults (contractName, bytecode, evm, deployedBytecode, libs) {
   let { bytecode: orgBytecode, metadata, decodedMetadata } = extractMetadataFromBytecode(bytecode)
   let evmBytecode = evm.bytecode.object
+  let evmDeployedBytecode = evm.deployedBytecode.object
   const { usedLibraries, linkLibraries } = parseLibraries(libs, evmBytecode, contractName)
 
-  if (Object.keys(linkLibraries).length > 0) evmBytecode = linker.link(evmBytecode, linkLibraries)
+  if (Object.keys(linkLibraries).length > 0) {
+    evmBytecode = linker.link(evmBytecode, linkLibraries)
+    evmDeployedBytecode = linker.link(evmDeployedBytecode, linkLibraries)
+  }
   let { bytecode: resultBytecode } = extractMetadataFromBytecode(evmBytecode)
 
   /**
@@ -105,9 +109,8 @@ export function verifyResults (contractName, bytecode, evm, deployedBytecode, li
     // remove metadata from original bytecode searching extracted metadata
     orgBytecode = removeMetadata(bytecode, metadata)
     // extract metadata from compiled deployed bytecode
-    const { metadata: compiledMetadata } = extractMetadataFromBytecode(evm.deployedBytecode.object)
+    const { metadata: compiledMetadata } = extractMetadataFromBytecode(evmDeployedBytecode)
     // remove metadata from compiled bytecode using extracted metadata
-    // resultBytecode = add0x(evm.bytecode.object)
     resultBytecode = add0x(evmBytecode)
     resultBytecode = removeMetadata(resultBytecode, compiledMetadata)
   }
