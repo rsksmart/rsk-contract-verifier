@@ -119,7 +119,7 @@ function verifyResults(contractName, bytecode, evm, deployedBytecode, libs) {
 }
 
 function removeMetadata(bytecode, metadata) {
-  const metadataStart = bytecode.indexOf(metadata);
+  const metadataStart = metadata.length;
   return metadataStart > 0 ? bytecode.substr(0, metadataStart) : bytecode;
 }
 
