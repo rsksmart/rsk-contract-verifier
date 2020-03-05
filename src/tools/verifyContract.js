@@ -9,14 +9,13 @@ const file = process.argv[2]
 if (!url || !file) help()
 const socket = IO.connect(url, { reconnect: true })
 console.log(`Waiting for WS on ${url}`)
+let payload
 
-socket.on('connect', data => {
+socket.on('connect', async data => {
   console.log('Connected! ✌')
   console.log(`sending payload`)
-  createPayload()
-    .then(payload => {
-      socket.emit('data', payload)
-    })
+  payload = await createPayload()
+  socket.emit('data', payload)
 })
 
 socket.on('disconnect', socket => {
@@ -25,6 +24,19 @@ socket.on('disconnect', socket => {
 
 socket.on('data', async res => {
   console.log('DATA', res)
+  try {
+    let { error, data } = res
+    if (error) throw new Error(error)
+    console.log()
+    console.log()
+    let { bytecodeHash, resultBytecodeHash } = data.result
+    if (bytecodeHash !== resultBytecodeHash) console.log('Verification failed')
+    else console.log('The source code was verified!')
+    process.exit(0)
+  } catch (err) {
+    console.error(err)
+    process.exit(9)
+  }
 })
 
 async function createPayload () {
