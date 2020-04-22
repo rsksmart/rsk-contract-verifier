@@ -30,8 +30,11 @@ socket.on('data', async res => {
     console.log()
     console.log()
     let { bytecodeHash, resultBytecodeHash } = data.result
-    if (bytecodeHash !== resultBytecodeHash) console.log('Verification failed')
-    else console.log('The source code was verified!')
+    if (bytecodeHash && resultBytecodeHash && bytecodeHash === resultBytecodeHash) {
+      console.log('The source code was verified!')
+    } else {
+      console.log('Verification failed')
+    }
     process.exit(0)
   } catch (err) {
     console.error(err)
