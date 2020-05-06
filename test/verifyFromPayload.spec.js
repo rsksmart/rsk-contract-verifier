@@ -1,15 +1,16 @@
 import { expect } from 'chai'
 import { verifyParams } from '../src/lib/verifyFromPayload'
 
-import payloads from './payloads/'
+import { Payloads } from './payloads.js'
+const payloads = Payloads()
 
-describe(`# Verify from payload`, () => {
-  for (let key in payloads) {
-    let payload = payloads[key]
-    let _expected = payload._expected || {}
+describe(`# Verify from payload`, async () => {
+  for (let key of payloads.list) {
     describe(`# contract ${key}`, function () {
       this.timeout(60000)
       it('should verify a contract from payload', async () => {
+        const payload = await payloads.load(key)
+        let _expected = payload._expected || {}
         const verification = await verifyParams(payload)
         expect(verification).to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
