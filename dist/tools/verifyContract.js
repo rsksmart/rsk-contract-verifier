@@ -23,15 +23,23 @@ socket.on('disconnect', socket => {
 });
 
 socket.on('data', async res => {
-  console.log('DATA', res);
+  console.log('DATA', JSON.stringify(res, null, 2));
   try {
     let { error, data } = res;
+    let { errors } = data.result || {};
     if (error) throw new Error(error);
     console.log();
     console.log();
     let { bytecodeHash, resultBytecodeHash } = data.result;
-    if (bytecodeHash !== resultBytecodeHash) console.log('Verification failed');else
-    console.log('The source code was verified!');
+    if (bytecodeHash && resultBytecodeHash && bytecodeHash === resultBytecodeHash) {
+      console.log('The source code was verified!');
+    } else {
+      console.log('Verification failed');
+      if (errors) {
+        console.error('Errors');
+        console.error(JSON.stringify(errors, null, 2));
+      }
+    }
     process.exit(0);
   } catch (err) {
     console.error(err);
