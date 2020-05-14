@@ -21,6 +21,8 @@ function testContract (contractName, useDeployedByteCode) {
       it(`should verify a contract`, async () => {
         deployedBytecode = (useDeployedByteCode) ? deployedBytecode : undefined
         const verification = await verifier.verify({ source, imports: contracts, version, bytecode, deployedBytecode, name: contractName })
+        let { errors } = verification
+        if (errors) console.log(errors)
         expect(verification, 'verification should be an object').to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')
