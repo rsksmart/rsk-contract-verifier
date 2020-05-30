@@ -12,6 +12,10 @@ function Verifier (options = {}) {
     try {
       /** deployedBytecode is optional, used to surf metadata bug
        * if it is provided  the verifier will try to extract the original metadata from it */
+
+      if (payload.bytecode) payload.bytecode = add0x(payload.bytecode)
+      if (payload.deployedBytecode) payload.deployedBytecode = add0x(payload.deployedBytecode)
+
       const { version, imports, bytecode, source, deployedBytecode, libraries, name } = payload
       if (!name) throw new Error('Invalid contract name')
       if (!bytecode) throw new Error(`Invalid bytecode`)
