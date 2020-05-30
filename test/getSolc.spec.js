@@ -44,6 +44,7 @@ describe(`# getSolc`, function () {
   })
 
   describe('load', function () {
+    this.timeout(60000)
     it(`should load solc snapshot`, async () => {
       const snapshot = await getSolc.load(version)
       expect(snapshot).to.be.an('object')
