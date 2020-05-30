@@ -101,18 +101,20 @@ export function verifyResults (contractName, bytecode, evm, deployedBytecode, li
     * is provided, try to extract metadata from it
     */
 
-  if (!metadata && deployedBytecode) {
-    // extract metadata from original deployed bytecode
-    const deployedBytecodeResult = extractMetadataFromBytecode(deployedBytecode)
-    metadata = deployedBytecodeResult.metadata
-    decodedMetadata = deployedBytecodeResult.decodedMetadata
-    // remove metadata from original bytecode searching extracted metadata
-    orgBytecode = removeMetadata(bytecode, metadata)
-    // extract metadata from compiled deployed bytecode
-    const { metadata: compiledMetadata } = extractMetadataFromBytecode(evmDeployedBytecode)
-    // remove metadata from compiled bytecode using extracted metadata
-    resultBytecode = add0x(evmBytecode)
-    resultBytecode = removeMetadata(resultBytecode, compiledMetadata)
+  if (deployedBytecode) {
+    if (!metadata || (resultBytecode !== orgBytecode)) {
+      // extract metadata from original deployed bytecode
+      const deployedBytecodeResult = extractMetadataFromBytecode(deployedBytecode)
+      metadata = deployedBytecodeResult.metadata
+      decodedMetadata = deployedBytecodeResult.decodedMetadata
+      // remove metadata from original bytecode searching extracted metadata
+      orgBytecode = removeMetadata(bytecode, metadata)
+      // extract metadata from compiled deployed bytecode
+      const { metadata: compiledMetadata } = extractMetadataFromBytecode(evmDeployedBytecode)
+      // remove metadata from compiled bytecode using extracted metadata
+      resultBytecode = add0x(evmBytecode)
+      resultBytecode = removeMetadata(resultBytecode, compiledMetadata)
+    }
   }
 
   return { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata }
