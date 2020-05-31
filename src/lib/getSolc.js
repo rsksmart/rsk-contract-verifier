@@ -24,11 +24,14 @@ export function GetSolc ({ solcCache, solcUrl, listUrl }) {
   const getVersionUrl = fileName => `${solcUrl}/${fileName}`
 
   const getList = async () => {
-    if (!versionsList) {
-      let data = await download(listUrl)
-      versionsList = data
-    }
+    if (!versionsList) await setVersionsLists()
+    else setVersionsLists()
     return versionsList
+  }
+
+  const setVersionsLists = async () => {
+    let data = await download(listUrl)
+    if (data) versionsList = data
   }
 
   const getVersionData = async version => {

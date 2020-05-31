@@ -1,10 +1,17 @@
 import { expect } from 'chai'
 import GetSolc from '../src/lib/getSolc'
 import { getHash } from '../src/lib/utils'
+import { createServer } from './HttpServer'
 
 const solcCache = '/tmp'
-let getSolc = GetSolc({ solcCache })
 
+const url = 'http://127.0.0.1:7077'
+let response = 'firstList'
+const server = createServer(url, (req, res) => {
+  res.end(response)
+}).listen()
+
+let getSolc = GetSolc({ solcCache })
 const test = JSON.parse(`{
   "path": "soljson-v0.5.8+commit.23d335f2.js",
   "version": "0.5.8",
@@ -20,7 +27,27 @@ describe(`# getSolc`, function () {
   const { longVersion: version, keccak256: codeHash, path: fileName } = test
 
   describe(`getList`, function () {
+    this.afterAll(() => server.close())
+    const getSolc2 = GetSolc({ listUrl: url })
     it(`should download the versions list`, async () => {
+      let list = await getSolc2.getList()
+      expect(list).to.be.equal('firstList')
+      response = 'secondList'
+    })
+    it(`the versions list should be cached`, async () => {
+      let list = await getSolc2.getList()
+      expect(response).to.be.equal('secondList')
+      expect(list).to.be.equal('firstList')
+    })
+
+    it(`the versions list should be updated after each request`, async () => {
+      let list = await getSolc2.getList()
+      expect(list).to.be.equal('secondList')
+    })
+  })
+
+  describe(`getList url`, function () {
+    it(`should download the versions list from remote server`, async () => {
       const list = await getSolc.getList()
       expect(list).to.be.an('object')
       expect(list).has.ownProperty('builds')
