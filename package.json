@@ -9,8 +9,7 @@
     "clean": "rm -rf dist",
     "md": "mkdir dist",
     "lint": "npx eslint src/**/*",
-    "test": "npx mocha",
-    "test-file": "npx mocha --opts ./test/singleFile.opts",
+    "test": "npx mocha test/**/*.spec.js",
     "cache-solc": "node dist/tools/cacheSolcVersions.js | npx bunyan "
   },
   "repository": {
