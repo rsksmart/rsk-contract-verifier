@@ -12,6 +12,10 @@ function Verifier(options = {}) {
     try {
       /** deployedBytecode is optional, used to surf metadata bug
           * if it is provided  the verifier will try to extract the original metadata from it */
+
+      if (payload.bytecode) payload.bytecode = (0, _utils.add0x)(payload.bytecode);
+      if (payload.deployedBytecode) payload.deployedBytecode = (0, _utils.add0x)(payload.deployedBytecode);
+
       const { version, imports, bytecode, source, deployedBytecode, libraries, name } = payload;
       if (!name) throw new Error('Invalid contract name');
       if (!bytecode) throw new Error(`Invalid bytecode`);
@@ -101,18 +105,20 @@ function verifyResults(contractName, bytecode, evm, deployedBytecode, libs) {
                                                                                                         * is provided, try to extract metadata from it
                                                                                                         */
 
-  if (!metadata && deployedBytecode) {
-    // extract metadata from original deployed bytecode
-    const deployedBytecodeResult = (0, _solidityMetadata.extractMetadataFromBytecode)(deployedBytecode);
-    metadata = deployedBytecodeResult.metadata;
-    decodedMetadata = deployedBytecodeResult.decodedMetadata;
-    // remove metadata from original bytecode searching extracted metadata
-    orgBytecode = removeMetadata(bytecode, metadata);
-    // extract metadata from compiled deployed bytecode
-    const { metadata: compiledMetadata } = (0, _solidityMetadata.extractMetadataFromBytecode)(evmDeployedBytecode);
-    // remove metadata from compiled bytecode using extracted metadata
-    resultBytecode = (0, _utils.add0x)(evmBytecode);
-    resultBytecode = removeMetadata(resultBytecode, compiledMetadata);
+  if (deployedBytecode) {
+    if (!metadata || resultBytecode !== orgBytecode) {
+      // extract metadata from original deployed bytecode
+      const deployedBytecodeResult = (0, _solidityMetadata.extractMetadataFromBytecode)(deployedBytecode);
+      metadata = deployedBytecodeResult.metadata;
+      decodedMetadata = deployedBytecodeResult.decodedMetadata;
+      // remove metadata from original bytecode searching extracted metadata
+      orgBytecode = removeMetadata(bytecode, metadata);
+      // extract metadata from compiled deployed bytecode
+      const { metadata: compiledMetadata } = (0, _solidityMetadata.extractMetadataFromBytecode)(evmDeployedBytecode);
+      // remove metadata from compiled bytecode using extracted metadata
+      resultBytecode = (0, _utils.add0x)(evmBytecode);
+      resultBytecode = removeMetadata(resultBytecode, compiledMetadata);
+    }
   }
 
   return { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata };

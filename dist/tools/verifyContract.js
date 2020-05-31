@@ -1,7 +1,8 @@
 "use strict";var _socket = _interopRequireDefault(require("socket.io-client"));
 var _path = _interopRequireDefault(require("path"));
 var _fs = _interopRequireDefault(require("fs"));
-var _util = _interopRequireDefault(require("util"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _util = _interopRequireDefault(require("util"));
+var _lib = require("./lib");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 const readFile = _util.default.promisify(_fs.default.readFile);
 const url = process.env.url || 'http://localhost:3008';
@@ -23,28 +24,11 @@ socket.on('disconnect', socket => {
 });
 
 socket.on('data', async res => {
-  console.log('DATA', JSON.stringify(res, null, 2));
-  try {
-    let { error, data } = res;
-    let { errors } = data.result || {};
-    if (error) throw new Error(error);
-    console.log();
-    console.log();
-    let { bytecodeHash, resultBytecodeHash } = data.result;
-    if (bytecodeHash && resultBytecodeHash && bytecodeHash === resultBytecodeHash) {
-      console.log('The source code was verified!');
-    } else {
-      console.log('Verification failed');
-      if (errors) {
-        console.error('Errors');
-        console.error(JSON.stringify(errors, null, 2));
-      }
-    }
-    process.exit(0);
-  } catch (err) {
-    console.error(err);
-    process.exit(9);
-  }
+  let { error, data } = res;
+  if (error) throw new Error(error);
+  console.log();
+  console.log();
+  (0, _lib.showResult)(data.result);
 });
 
 async function createPayload() {
@@ -63,6 +47,6 @@ function help() {
   console.log('Usage:');
   console.log(`1 - Set url of contract-verifier-api as an enviroment variable`);
   console.log(`    e.g. export url='http://localhost:3008'`);
-  console.log(`2 - ${process.argv[0]} ${process.argv[1]} <payload.file.json>`);
+  console.log(`2 - ${process.argv[0]} ${process.argv[1]} <path to payload.file.json>`);
   process.exit(0);
 }

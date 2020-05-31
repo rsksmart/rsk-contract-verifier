@@ -55,10 +55,11 @@ function Compiler({ solcCache } = {}) {
 
   const getImport = (path, contracts) => {
     const parts = path.split('/');
-    let file = parts.pop();
-    file = file.split('.');
+    let name = parts.pop();
+    let file = name.split('.');
     if (file[1] === 'sol') {
       const contract = contracts[file[0]];
+      if (!contract) return { error: `Missing contract: ${name}` };
       const contents = contract.source || contract.content;
       if (contents) return { contents };
     }
