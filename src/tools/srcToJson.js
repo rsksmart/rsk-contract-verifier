@@ -1,26 +1,28 @@
 import path from 'path'
 import fs from 'fs'
 import util from 'util'
-import payload from './payload.example.json'
+import examplePayload from './payload.example.json'
 
 const readFile = util.promisify(fs.readFile)
 const readDir = util.promisify(fs.readdir)
 
-const file = process.argv[2]
-const dir = process.argv[3]
+const [, , file, dir, basePayload] = process.argv
 if (!file) help()
-convert(file, dir).then(() => process.exit(0))
+convert(file, dir, basePayload).then(() => process.exit(0))
 
 async function loadFile (file) {
   let content = await readFile(path.resolve(file))
   if (content) return content.toString()
 }
 
-async function convert (file, dir) {
+async function convert (file, dir, basePayload) {
   try {
+    let payload = basePayload
+      ? JSON.parse(await loadFile(basePayload))
+      : examplePayload
+    if (!payload.name) payload.name = ''
+    if (!payload.bytecode) payload.bytecode = ''
     payload.source = await loadFile(file)
-    payload.name = ''
-    payload.bytecode = ''
     payload.imports = await loadImports(dir)
     console.log(JSON.stringify(payload, null, 2))
   } catch (err) {
