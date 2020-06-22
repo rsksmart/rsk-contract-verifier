@@ -6,7 +6,9 @@ import examplePayload from './payload.example.json'
 const readFile = util.promisify(fs.readFile)
 const readDir = util.promisify(fs.readdir)
 
-const [, , file, dir, basePayload] = process.argv
+const file = process.argv[2]
+const dir = process.argv[3]
+const basePayload = process.argv[4]
 if (!file) help()
 convert(file, dir, basePayload).then(() => process.exit(0))
 
