@@ -1,29 +1,48 @@
 import path from 'path'
 import fs from 'fs'
 import util from 'util'
-import examplePayload from './payload.example.json'
-
 const readFile = util.promisify(fs.readFile)
 const readDir = util.promisify(fs.readdir)
 
-const file = process.argv[2]
-const dir = process.argv[3]
-const basePayload = process.argv[4]
+const args = {
+  file: 'Main .sol file',
+  dir: '[optional] path to imported .sol files.',
+  payload: '[optional] base payload'
+}
+
+let { file, dir, payload } = parseArguments()
+payload = payload || path.join(__dirname, 'payload.example.json')
+
 if (!file) help()
-convert(file, dir, basePayload).then(() => process.exit(0))
+convert(file, dir, payload).then(() => process.exit(0))
+
+function argKey (name) {
+  return `--${name}=`
+}
+
+function parseArguments () {
+  const { argv } = process
+  const parsed = {}
+  for (let a in args) {
+    let key = argKey(a)
+    let arg = argv.find(ar => ar.startsWith(key))
+    if (arg) parsed[a] = arg.replace(key, '')
+  }
+  return parsed
+}
 
 async function loadFile (file) {
   let content = await readFile(path.resolve(file))
   if (content) return content.toString()
 }
 
-async function convert (file, dir, basePayload) {
+async function convert (file, dir, payloadFile) {
   try {
-    let payload = basePayload
-      ? JSON.parse(await loadFile(basePayload))
-      : examplePayload
-    if (!payload.name) payload.name = ''
-    if (!payload.bytecode) payload.bytecode = ''
+    let payload = await loadFile(payloadFile)
+    payload = JSON.parse(payload)
+    let { name, bytecode } = payload
+    payload.name = name || ''
+    payload.bytecode = bytecode || ''
     payload.source = await loadFile(file)
     payload.imports = await loadImports(dir)
     console.log(JSON.stringify(payload, null, 2))
@@ -49,9 +68,8 @@ async function loadImports (dir) {
 }
 
 function help () {
+  const ars = Object.entries(args).map(([name, desc]) => `${argKey(name)}${desc}`)
   console.log('Usage:')
-  console.log(`${process.argv[0]} ${process.argv[1]} <source-file> [<source-dir>]`)
-  console.log(`source-file: main .sol file.`)
-  console.log(`source-dir: path to folder that contains .sol imported files.`)
+  console.log(`${process.argv[0]} ${process.argv[1]} ${ars.join(' ')}`)
   process.exit(0)
 }
