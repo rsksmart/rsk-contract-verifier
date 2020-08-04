@@ -1,4 +1,5 @@
-import { toBuffer, toHexString, remove0x } from './utils'
+import { toBuffer, remove0x } from 'rsk-utils'
+import { toHexString } from '../lib/utils'
 import cbor from 'cbor'
 
 export const getMetadataLength = bytecode => {
@@ -68,7 +69,7 @@ export const decodeMetadata = metadata => {
     const decoded = cbor.decode(metadata)
     if (typeof decoded !== 'object') throw (new Error('Decode fail'))
     for (let p in decoded) {
-      decoded[p] = remove0x(toHexString(decoded[p]))
+      if (typeof decoded[p] !== 'number') decoded[p] = remove0x(toHexString(decoded[p]))
     }
     return decoded
   } catch (err) {

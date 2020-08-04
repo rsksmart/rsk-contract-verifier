@@ -1,5 +1,5 @@
 import linker from 'solc/linker'
-import { keccak256 } from 'ethereumjs-util'
+import { keccak256 } from 'rsk-utils'
 
 /**
  * solc-js libraryHashPlaceholder

@@ -6,7 +6,6 @@ import metadatas from './metadatas.json'
 const contracts = truffleContracts()
 
 describe(`# solidityMetadata`, function () {
-  const metadata = 'a165627a7a723058205fb59448c6644241ee553549e0418378516927062afdca0d71d7c23f3b584f740029'
   describe(`isValidMetadataLength()`, function () {
     const test = [
       ['a1650011223344556677000a', true],

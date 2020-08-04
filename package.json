@@ -27,10 +27,10 @@
     "axios": "^0.19.0",
     "bunyan": "^2.0.2",
     "cbor": "^4.3.0",
-    "ethereumjs-util": "^6.1.0",
     "require-from-string": "^2.0.2",
     "socket.io": "^2.3.0",
-    "solc": "^0.5.13"
+    "solc": "^0.5.13",
+    "rsk-utils": "git+https://github.com/rsksmart/rsk-utils.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.2",

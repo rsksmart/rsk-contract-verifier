@@ -5,39 +5,6 @@ chai.use(chaiBytes)
 const { expect } = chai
 
 describe(`# utils`, function () {
-
-  describe(`remove0x()`, function () {
-    const test = [
-      ['0x', ''],
-      ['0x0', '0'],
-      ['a', 'a'],
-      [123, 123],
-      ['0x123', '123'],
-      [[], []],
-      ['abc', 'abc']
-    ]
-    for (let t of test) {
-      let [value, expected] = t
-      it(`${value} should be ${expected}`, () => {
-        expect(utils.remove0x(value)).to.be.deep.equal(expected)
-      })
-    }
-  })
-  describe('toBuffer()', function () {
-    const tests = [
-      [Buffer.from('a'), Buffer.from('a')],
-      ['ABC', Buffer.from('ABC', 'utf-8'), 'utf-8'],
-      [1234, Buffer.from('1234', 'hex')],
-      ['0xab12e', Buffer.from('ab12e', 'hex')]
-    ]
-    for (let t of tests) {
-      const [v, expected, encoding] = t
-      it(`${v} should be ${expected}`, () => {
-        expect(utils.toBuffer(v, encoding)).to.equalBytes(expected)
-      })
-    }
-  })
-
   describe(`forwardBytesDifference()`, function () {
     const test = [
       ['', '', Buffer.from('')],
