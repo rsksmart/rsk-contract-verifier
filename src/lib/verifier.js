@@ -3,10 +3,11 @@ import linker from './linker'
 import { getHash } from './utils'
 import { add0x } from 'rsk-utils'
 import { extractMetadataFromBytecode } from './solidityMetadata'
+import { remove0x } from 'rsk-utils/dist/strings'
 
 const SEVERITY_WARNING = 'warning'
 
-function Verifier (options = {}) {
+export function Verifier (options = {}) {
   const compiler = Compiler(options)
 
   const verify = async (payload = {}, { resolveImports } = {}) => {
@@ -79,7 +80,7 @@ function Verifier (options = {}) {
   return Object.freeze({ verify, hash: getHash })
 }
 
-function filterResultErrors ({ errors }) {
+export function filterResultErrors ({ errors }) {
   let warnings
   if (errors) {
     warnings = errors.filter(e => e.severity === SEVERITY_WARNING)
@@ -125,17 +126,19 @@ export function verifyResults (contractName, bytecode, evm, deployedBytecode, li
   return { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata }
 }
 
-function removeMetadata (bytecode, metadata) {
-  const metadataStart = metadata.length
+export function removeMetadata (bytecode, metadata) {
+  if (!metadata) return bytecode
+  metadata = remove0x(metadata)
+  const metadataStart = bytecode.lastIndexOf(metadata)
   return (metadataStart > 0) ? bytecode.substr(0, metadataStart) : bytecode
 }
 
-function removeLibraryPrefix (lib) {
+export function removeLibraryPrefix (lib) {
   const [prefix, name] = lib.split(':')
   return (prefix && name) ? name : lib
 }
 
-function getLibrariesPlaceHolders (libraries, prefix) {
+export function getLibrariesPlaceHolders (libraries, prefix) {
   const placeholders = {}
 
   const addLibraryPlaceHolder = (name, address, key) => {
@@ -151,7 +154,7 @@ function getLibrariesPlaceHolders (libraries, prefix) {
   return placeholders
 }
 
-function findLibrary (key, prefix, libraries) {
+export function findLibrary (key, prefix, libraries) {
   if (typeof libraries !== 'object') throw new Error('Libraries must be an object')
   let name = removeLibraryPrefix(key)
   let address = libraries[name]
@@ -163,7 +166,7 @@ function findLibrary (key, prefix, libraries) {
   return { address, library, name }
 }
 
-function parseLibraries (libraries, bytecode, prefix) {
+export function parseLibraries (libraries, bytecode, prefix) {
   const bytecodeLibs = linker.find(bytecode)
   const libs = []
   for (let key in bytecodeLibs) {
@@ -182,7 +185,7 @@ function parseLibraries (libraries, bytecode, prefix) {
   return { usedLibraries, linkLibraries }
 }
 
-function resultSettings (compiled) {
+export function resultSettings (compiled) {
   const { compiler, language, settings } = JSON.parse(compiled.metadata)
   const { evmVersion, libraries, optimizer, remappings } = settings
   return { compiler, language, evmVersion, libraries, optimizer, remappings }

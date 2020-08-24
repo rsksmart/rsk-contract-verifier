@@ -6,6 +6,7 @@ import { truffleContracts } from './contracts'
 const contracts = truffleContracts()
 
 describe(`# Verifier`, function () {
+
   testContract('helloWorld')
   testContract('Test721', true) // use deployedBytecode to surf solidity metadata bug
   testContract('TestErc20')
