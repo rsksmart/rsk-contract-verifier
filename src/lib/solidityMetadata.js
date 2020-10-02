@@ -76,3 +76,11 @@ export const decodeMetadata = metadata => {
     return undefined
   }
 }
+
+export const encodeMetadata = metadata => {
+  metadata = cbor.encode(metadata)
+  const len = metadata.length
+  metadata = Buffer.concat([metadata, Buffer.from('00')])
+  metadata.writeUInt16BE(parseInt(len), len)
+  return metadata
+}

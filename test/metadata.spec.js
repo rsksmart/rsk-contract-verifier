@@ -1,7 +1,14 @@
 import { expect } from 'chai'
-import { decodeMetadata, isValidMetadataLength, extractMetadataFromBytecode, removeEmptyBytesFromBytecodeEnd } from '../src/lib/solidityMetadata'
+import {
+  decodeMetadata,
+  isValidMetadataLength,
+  extractMetadataFromBytecode,
+  removeEmptyBytesFromBytecodeEnd,
+  encodeMetadata
+} from '../src/lib/solidityMetadata'
 import { truffleContracts } from './contracts'
 import metadatas from './metadatas.json'
+import crypto from 'crypto'
 
 const contracts = truffleContracts()
 
@@ -30,6 +37,24 @@ describe(`# solidityMetadata`, function () {
       expect(test('0049000000000000000000000000')).to.be.equal('0049')
       expect(test('00290000000000000000000000000000000000000000000000000000000000000000')).to.be.equal('0029')
     })
+  })
+
+  describe(`encodeMetadata()`, function () {
+    const meta = [
+      { test: 'test' },
+      { a: 0 },
+      {
+        a: crypto.randomBytes(64).toString('hex'),
+        b: crypto.randomBytes(128).toString('hex')
+      }
+    ]
+    for (let decoded of meta) {
+      it(`should encode metadata`, () => {
+        const encoded = encodeMetadata(decoded).toString('hex')
+        expect(isValidMetadataLength(encoded)).to.be.deep.equal(true)
+        expect(decodeMetadata(encoded)).to.be.deep.equal(decoded)
+      })
+    }
   })
 
   describe(`decodeMetadata()`, function () {
