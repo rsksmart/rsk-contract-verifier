@@ -1,5 +1,5 @@
 import linker from 'solc/linker'
-import { keccak256 } from 'rsk-utils'
+import { keccak256 } from '@rsksmart/rsk-utils'
 
 /**
  * solc-js libraryHashPlaceholder

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { Queue } from '../src/lib/Queue'
-import { isHexString } from 'rsk-utils'
+import { isHexString } from '@rsksmart/rsk-utils'
 
 describe(`# Queue`, function () {
   describe(`queued()`, function () {

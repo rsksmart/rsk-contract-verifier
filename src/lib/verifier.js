@@ -1,9 +1,8 @@
 import Compiler from './compiler'
 import linker from './linker'
 import { getHash } from './utils'
-import { add0x } from 'rsk-utils'
+import { add0x, remove0x } from '@rsksmart/rsk-utils'
 import { extractMetadataFromBytecode } from './solidityMetadata'
-import { remove0x } from 'rsk-utils/dist/strings'
 
 const SEVERITY_WARNING = 'warning'
 

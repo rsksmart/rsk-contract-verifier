@@ -1,4 +1,4 @@
-import { toBuffer, remove0x } from 'rsk-utils'
+import { toBuffer, remove0x } from '@rsksmart/rsk-utils'
 import { toHexString } from '../lib/utils'
 import cbor from 'cbor'
 

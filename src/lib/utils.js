@@ -1,4 +1,4 @@
-import { keccak256, toBuffer, add0x } from 'rsk-utils'
+import { keccak256, toBuffer, add0x } from '@rsksmart/rsk-utils'
 import crypto from 'crypto'
 
 export const toHexString = stringOrBuffer => {
