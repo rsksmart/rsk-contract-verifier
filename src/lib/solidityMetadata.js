@@ -49,7 +49,7 @@ export const isValidMetadataLength = metadata => {
 export const isValidMetadata = metadata => {
   if (isValidMetadataLength(metadata)) {
     const decoded = decodeMetadata(metadata)
-    return (typeof decoded === 'object') ? decoded : false
+    return (decoded && typeof decoded === 'object' && !Array.isArray(decoded)) ? decoded : false
   }
 }
 

@@ -20,7 +20,7 @@ describe(`# Verify from payload`, async () => {
         expect(verification).has.ownProperty('decodedMetadata')
         expect(verification.errors).to.be.equal(undefined)
         for (let e in _expected) {
-          expect(verification[e]).to.be.deep.equal(_expected[e])
+          expect(verification[e], e).to.be.deep.equal(_expected[e])
         }
         expect(verification.bytecodeHash, 'hashes').to.be.deep.equal(verification.resultBytecodeHash)
       })
