@@ -11,7 +11,7 @@ const readFile = promisify(fs.readFile)
 const getStat = promisify(fs.stat)
 
 export function GetSolc ({ solcCache, solcUrl, listUrl }) {
-  solcUrl = solcUrl || 'https://ethereum.github.io/solc-bin/bin'
+  solcUrl = solcUrl || 'https://binaries.soliditylang.org/bin'
   listUrl = listUrl || `${solcUrl}/list.json`
 
   const DIR = solcCache || defaultConfig.solcCache

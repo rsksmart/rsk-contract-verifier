@@ -19,7 +19,8 @@ const test = JSON.parse(`{
   "longVersion": "0.5.8+commit.23d335f2",
   "keccak256": "0x7bdfc3e09790d5b1f488b10a8c0da4f85a8a64482c2be5566969feafdd7deb9d",
   "urls": [
-    "bzzr://8923240b6d3f6e2f38ced6d5f8bfeb1b8a64ee49cdd358ea5c582dde194a699a"
+    "bzzr://8923240b6d3f6e2f38ced6d5f8bfeb1b8a64ee49cdd358ea5c582dde194a699a",
+    "dweb:/ipfs/QmdLsm73rn9KSHukKrZPbuzWGUmrwKugdpDExKSqowvHgz"
   ]
 }`)
 
