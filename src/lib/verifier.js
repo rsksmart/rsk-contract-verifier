@@ -1,8 +1,8 @@
 import Compiler from './compiler'
 import linker from './linker'
 import { getHash } from './utils'
-import { add0x, remove0x } from '@rsksmart/rsk-utils'
-import { extractMetadataFromBytecode } from './solidityMetadata'
+import { add0x } from '@rsksmart/rsk-utils'
+import { isValidMetadata, searchMetadata } from './solidityMetadata'
 
 const SEVERITY_WARNING = 'warning'
 
@@ -11,13 +11,8 @@ export function Verifier (options = {}) {
 
   const verify = async (payload = {}, { resolveImports } = {}) => {
     try {
-      /** deployedBytecode is optional, used to surf metadata bug
-       * if it is provided  the verifier will try to extract the original metadata from it */
-
       if (payload.bytecode) payload.bytecode = add0x(payload.bytecode)
-      if (payload.deployedBytecode) payload.deployedBytecode = add0x(payload.deployedBytecode)
-
-      const { version, imports, bytecode, source, deployedBytecode, libraries, name } = payload
+      const { version, imports, bytecode, source, libraries, name } = payload
       if (!name) throw new Error('Invalid contract name')
       if (!bytecode) throw new Error(`Invalid bytecode`)
       const KEY = name
@@ -47,7 +42,7 @@ export function Verifier (options = {}) {
       const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
 
-      const { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata } = verifyResults(KEY, bytecode, evm, deployedBytecode, libraries)
+      const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata } = verifyResults(KEY, bytecode, evm, libraries)
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
@@ -60,7 +55,6 @@ export function Verifier (options = {}) {
         usedSettings,
         usedLibraries,
         bytecode,
-        metadata,
         resultBytecode,
         bytecodeHash,
         resultBytecodeHash,
@@ -89,47 +83,32 @@ export function filterResultErrors ({ errors }) {
   return { errors, warnings }
 }
 
-export function verifyResults (contractName, bytecode, evm, deployedBytecode, libs) {
-  let { bytecode: orgBytecode, metadata, decodedMetadata } = extractMetadataFromBytecode(bytecode)
+export function verifyResults (contractName, bytecode, evm, libs) {
+  const metadataList = searchMetadata(bytecode)
+
+  let decodedMetadata = metadataList.map(m => isValidMetadata(m))
   let evmBytecode = evm.bytecode.object
-  let evmDeployedBytecode = evm.deployedBytecode.object
   const { usedLibraries, linkLibraries } = parseLibraries(libs, evmBytecode, contractName)
 
   if (Object.keys(linkLibraries).length > 0) {
     evmBytecode = linker.link(evmBytecode, linkLibraries)
-    evmDeployedBytecode = linker.link(evmDeployedBytecode, linkLibraries)
   }
-  let { bytecode: resultBytecode } = extractMetadataFromBytecode(evmBytecode)
 
-  /**
-    * To contain solidity compiler metadata bug, if deployedBytecode
-    * is provided, try to extract metadata from it
-    */
+  const resultMetadataList = searchMetadata(evmBytecode)
+  if (metadataList.length !== resultMetadataList.length) {
+    throw new Error('invalid metadata list length')
+  }
 
-  if (deployedBytecode) {
-    if (!metadata || (resultBytecode !== orgBytecode)) {
-      // extract metadata from original deployed bytecode
-      const deployedBytecodeResult = extractMetadataFromBytecode(deployedBytecode)
-      metadata = deployedBytecodeResult.metadata
-      decodedMetadata = deployedBytecodeResult.decodedMetadata
-      // remove metadata from original bytecode searching extracted metadata
-      orgBytecode = removeMetadata(bytecode, metadata)
-      // extract metadata from compiled deployed bytecode
-      const { metadata: compiledMetadata } = extractMetadataFromBytecode(evmDeployedBytecode)
-      // remove metadata from compiled bytecode using extracted metadata
-      resultBytecode = add0x(evmBytecode)
-      resultBytecode = removeMetadata(resultBytecode, compiledMetadata)
+  for (let i in metadataList) {
+    if (decodedMetadata[i] && resultMetadataList[i].length === metadataList[i].length && isValidMetadata(metadataList[i])) {
+      resultMetadataList[i] = metadataList[i]
     }
   }
 
-  return { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata }
-}
-
-export function removeMetadata (bytecode, metadata) {
-  if (!metadata) return bytecode
-  metadata = remove0x(metadata)
-  const metadataStart = bytecode.lastIndexOf(metadata)
-  return (metadataStart > 0) ? bytecode.substr(0, metadataStart) : bytecode
+  const resultBytecode = add0x(resultMetadataList.join(''))
+  decodedMetadata = decodedMetadata.filter(m => m)
+  const orgBytecode = add0x(bytecode)
+  return { resultBytecode, orgBytecode, usedLibraries, decodedMetadata }
 }
 
 export function removeLibraryPrefix (lib) {

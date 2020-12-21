@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import { verifyParams } from '../src/lib/verifyFromPayload'
 
 import { Payloads } from './payloads.js'
+
 const payloads = Payloads()
 
 describe(`# Verify from payload`, async () => {
@@ -12,6 +13,7 @@ describe(`# Verify from payload`, async () => {
         const payload = await payloads.load(key)
         let _expected = payload._expected || {}
         const verification = await verifyParams(payload)
+        // console.log(verification)
         expect(verification).to.be.an('object')
         expect(verification).has.ownProperty('bytecodeHash')
         expect(verification).has.ownProperty('resultBytecodeHash')
