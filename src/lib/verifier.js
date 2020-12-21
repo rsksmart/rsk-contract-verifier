@@ -42,7 +42,7 @@ export function Verifier (options = {}) {
       const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
 
-      const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata } = verifyResults(KEY, bytecode, evm, libraries)
+      const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata } = verifyResults({ contractName: KEY, bytecode, evm, libraries })
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
@@ -83,12 +83,12 @@ export function filterResultErrors ({ errors }) {
   return { errors, warnings }
 }
 
-export function verifyResults (contractName, bytecode, evm, libs) {
+export function verifyResults ({ contractName, bytecode, evm, libraries }) {
   const metadataList = searchMetadata(bytecode)
 
   let decodedMetadata = metadataList.map(m => isValidMetadata(m))
   let evmBytecode = evm.bytecode.object
-  const { usedLibraries, linkLibraries } = parseLibraries(libs, evmBytecode, contractName)
+  const { usedLibraries, linkLibraries } = parseLibraries(libraries, evmBytecode, contractName)
 
   if (Object.keys(linkLibraries).length > 0) {
     evmBytecode = linker.link(evmBytecode, linkLibraries)
