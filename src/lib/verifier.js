@@ -3,6 +3,7 @@ import linker from './linker'
 import { getHash } from './utils'
 import { add0x } from '@rsksmart/rsk-utils'
 import { isValidMetadata, searchMetadata } from './solidityMetadata'
+import { encodeConstructorArgs } from './constructor'
 
 const SEVERITY_WARNING = 'warning'
 
@@ -12,7 +13,7 @@ export function Verifier (options = {}) {
   const verify = async (payload = {}, { resolveImports } = {}) => {
     try {
       if (payload.bytecode) payload.bytecode = add0x(payload.bytecode)
-      const { version, imports, bytecode, source, libraries, name } = payload
+      const { version, imports, bytecode, source, libraries, name, constructorArguments } = payload
       if (!name) throw new Error('Invalid contract name')
       if (!bytecode) throw new Error(`Invalid bytecode`)
       const KEY = name
@@ -41,8 +42,8 @@ export function Verifier (options = {}) {
       if (!contracts || !contracts[KEY]) throw new Error('Empty compilation result')
       const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
-
-      const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata } = verifyResults({ contractName: KEY, bytecode, evm, libraries })
+      const vargs = { contractName: KEY, bytecode, evm, libraries, constructorArguments, abi }
+      const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata } = verifyResults(vargs)
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
       const bytecodeHash = getHash(orgBytecode)
@@ -83,10 +84,10 @@ export function filterResultErrors ({ errors }) {
   return { errors, warnings }
 }
 
-export function verifyResults ({ contractName, bytecode, evm, libraries }) {
+export function verifyResults ({ contractName, bytecode, evm, libraries, constructorArguments, abi }) {
   const metadataList = searchMetadata(bytecode)
+  const constructorArgsEncoded = (constructorArguments && abi) ? encodeConstructorArgs(constructorArguments, abi) : undefined
 
-  let decodedMetadata = metadataList.map(m => isValidMetadata(m))
   let evmBytecode = evm.bytecode.object
   const { usedLibraries, linkLibraries } = parseLibraries(libraries, evmBytecode, contractName)
 
@@ -95,15 +96,20 @@ export function verifyResults ({ contractName, bytecode, evm, libraries }) {
   }
 
   const resultMetadataList = searchMetadata(evmBytecode)
-  if (metadataList.length !== resultMetadataList.length) {
-    throw new Error('invalid metadata list length')
-  }
 
+  /*   if (metadataList.length !== resultMetadataList.length) {
+      throw new Error('invalid metadata list length')
+    } */
+
+  let decodedMetadata = metadataList.map(m => isValidMetadata(m))
   for (let i in metadataList) {
     if (decodedMetadata[i] && resultMetadataList[i].length === metadataList[i].length && isValidMetadata(metadataList[i])) {
       resultMetadataList[i] = metadataList[i]
     }
   }
+
+  // Add constructor args to bytecode
+  if (constructorArgsEncoded) resultMetadataList.push(constructorArgsEncoded)
 
   const resultBytecode = add0x(resultMetadataList.join(''))
   decodedMetadata = decodedMetadata.filter(m => m)
