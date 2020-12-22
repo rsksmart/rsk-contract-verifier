@@ -1,46 +1,33 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.decodeMetadata = exports.extractMetadataFromBytecode = exports.isValidMetadata = exports.isValidMetadataLength = exports.getMetadata = exports.removeEmptyBytesFromBytecodeEnd = exports.getMetadataLength = void 0;var _utils = require("./utils");
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.searchMetadata = exports.encodeMetadata = exports.decodeMetadata = exports.isValidMetadata = exports.isValidMetadataLength = exports.getMetadataStart = exports.removeEmptyBytesFromBytecodeEnd = exports.getMetadataLength = void 0;var _rskUtils = require("@rsksmart/rsk-utils");
+var _utils = require("../lib/utils");
 var _cbor = _interopRequireDefault(require("cbor"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 const getMetadataLength = bytecode => {
-  bytecode = (0, _utils.toBuffer)(bytecode);
+  bytecode = (0, _rskUtils.toBuffer)(bytecode);
   const pos = bytecode.length - 2;
-  if (pos > 0) return bytecode.readUInt16BE(pos);
+  if (pos > 0) {
+    const len = bytecode.readUInt16BE(pos);
+    return len > 0 ? len : 0;
+  }
 };exports.getMetadataLength = getMetadataLength;
 
 const removeEmptyBytesFromBytecodeEnd = bytecode => {
-  bytecode = Buffer.from([...(0, _utils.toBuffer)(bytecode)]);
+  bytecode = Buffer.from([...(0, _rskUtils.toBuffer)(bytecode)]);
   while (getMetadataLength(bytecode) === 0) {
     bytecode = bytecode.slice(0, bytecode.length - 2);
   }
   return bytecode;
 };exports.removeEmptyBytesFromBytecodeEnd = removeEmptyBytesFromBytecodeEnd;
 
-const getMetadata = (bytecode, metadataList) => {
-  bytecode = (0, _utils.toBuffer)(bytecode);
-  metadataList = metadataList || [];
-  let metaDataStart = bytecode.length - getMetadataLength(bytecode) - 2;
-  if (metaDataStart >= 0 && metaDataStart <= bytecode.length) {
-    let newMetadata = bytecode.slice(metaDataStart, bytecode.length);
-    if (isValidMetadataLength(newMetadata)) {
-      metadataList.push(newMetadata);
-      bytecode = bytecode.slice(0, metaDataStart);
-      return getMetadata(bytecode, metadataList);
-    }
-  }
-  let metadata, decodedMetadata;
-  if (metadataList.length) {
-    metadataList = metadataList.reverse();
-    decodedMetadata = metadataList.map(function (m) {return isValidMetadata(m);});
-    if (!decodedMetadata.includes(false)) {
-      metadata = Buffer.concat(metadataList).toString('hex');
-    }
-  }
-  return { metadata, decodedMetadata };
-};exports.getMetadata = getMetadata;
+const getMetadataStart = bytecode => {
+  bytecode = (0, _rskUtils.toBuffer)(bytecode);
+  const len = getMetadataLength(bytecode);
+  return len < bytecode.length ? bytecode.length - getMetadataLength(bytecode) - 2 : 0;
+};exports.getMetadataStart = getMetadataStart;
 
 const isValidMetadataLength = metadata => {
   if (!metadata) return false;
-  metadata = (0, _utils.toBuffer)(metadata);
+  metadata = Buffer.from([...(0, _rskUtils.toBuffer)(metadata)]);
   const len = getMetadataLength(metadata);
   return len === metadata.length - 2;
 };exports.isValidMetadataLength = isValidMetadataLength;
@@ -48,30 +35,54 @@ const isValidMetadataLength = metadata => {
 const isValidMetadata = metadata => {
   if (isValidMetadataLength(metadata)) {
     const decoded = decodeMetadata(metadata);
-    return typeof decoded === 'object' ? decoded : false;
+    return decoded && typeof decoded === 'object' && !Array.isArray(decoded) ? decoded : false;
   }
 };exports.isValidMetadata = isValidMetadata;
 
-const extractMetadataFromBytecode = bytecodeStringOrBuffer => {
-  const buffer = removeEmptyBytesFromBytecodeEnd(bytecodeStringOrBuffer);
-  let bytecode = (0, _utils.toHexString)(bytecodeStringOrBuffer);
-  const { metadata, decodedMetadata } = getMetadata(buffer);
-  if (metadata) {
-    bytecode = (0, _utils.toHexString)(buffer.slice(0, buffer.length - metadata.length));
-  }
-  return { bytecode, metadata, decodedMetadata };
-};exports.extractMetadataFromBytecode = extractMetadataFromBytecode;
-
 const decodeMetadata = metadata => {
   try {
+    metadata = Buffer.from([...(0, _rskUtils.toBuffer)(metadata)]);
     if (!isValidMetadataLength(metadata)) throw new Error('Invalid length');
-    const decoded = _cbor.default.decode(metadata);
+    const decoded = _cbor.default.decodeFirstSync(metadata.toString('hex').slice(0, -4));
     if (typeof decoded !== 'object') throw new Error('Decode fail');
     for (let p in decoded) {
-      decoded[p] = (0, _utils.remove0x)((0, _utils.toHexString)(decoded[p]));
+      const value = decoded[p];
+      if (typeof value !== 'number') decoded[p] = (0, _rskUtils.remove0x)((0, _utils.toHexString)(value));
     }
     return decoded;
   } catch (err) {
     return undefined;
   }
 };exports.decodeMetadata = decodeMetadata;
+
+const encodeMetadata = metadata => {
+  metadata = _cbor.default.encode(metadata);
+  const len = metadata.length;
+  metadata = Buffer.concat([metadata, Buffer.from('00')]);
+  metadata.writeUInt16BE(parseInt(len), len);
+  return metadata;
+};exports.encodeMetadata = encodeMetadata;
+
+const searchMetadata = bytecodeStrOrBuffer => {
+  let bytecode = (0, _rskUtils.toBuffer)(bytecodeStrOrBuffer);
+  if (!bytecode || !bytecode.length) throw new Error('invalid bytecode');
+  let newBytecode = Buffer.from([...bytecode]);
+  const parts = [];
+  while (newBytecode.length > 0) {
+    const start = getMetadataStart(newBytecode) || newBytecode.length - 1;
+    const metadata = newBytecode.slice(start, newBytecode.length);
+    let trim = 0;
+    if (isValidMetadata(metadata)) {
+      parts.unshift(metadata.toString('hex'));
+      parts.unshift('');
+      trim = metadata.length;
+    } else {
+      trim = 1;
+      const last = parts[0] === undefined ? '' : parts[0];
+      parts[0] = newBytecode.slice(newBytecode.length - trim, newBytecode.length).toString('hex') + last;
+    }
+    trim = newBytecode.length - trim;
+    newBytecode = newBytecode.slice(0, trim);
+  }
+  return parts;
+};exports.searchMetadata = searchMetadata;

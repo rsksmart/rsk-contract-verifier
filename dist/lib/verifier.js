@@ -1,7 +1,9 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.verifyResults = verifyResults;exports.default = void 0;var _compiler = _interopRequireDefault(require("./compiler"));
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.Verifier = Verifier;exports.filterResultErrors = filterResultErrors;exports.verifyResults = verifyResults;exports.removeLibraryPrefix = removeLibraryPrefix;exports.getLibrariesPlaceHolders = getLibrariesPlaceHolders;exports.findLibrary = findLibrary;exports.parseLibraries = parseLibraries;exports.resultSettings = resultSettings;exports.default = void 0;var _compiler = _interopRequireDefault(require("./compiler"));
 var _linker = _interopRequireDefault(require("./linker"));
 var _utils = require("./utils");
-var _solidityMetadata = require("./solidityMetadata");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _rskUtils = require("@rsksmart/rsk-utils");
+var _solidityMetadata = require("./solidityMetadata");
+var _constructor = require("./constructor");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 const SEVERITY_WARNING = 'warning';
 
@@ -10,13 +12,8 @@ function Verifier(options = {}) {
 
   const verify = async (payload = {}, { resolveImports } = {}) => {
     try {
-      /** deployedBytecode is optional, used to surf metadata bug
-          * if it is provided  the verifier will try to extract the original metadata from it */
-
-      if (payload.bytecode) payload.bytecode = (0, _utils.add0x)(payload.bytecode);
-      if (payload.deployedBytecode) payload.deployedBytecode = (0, _utils.add0x)(payload.deployedBytecode);
-
-      const { version, imports, bytecode, source, deployedBytecode, libraries, name } = payload;
+      if (payload.bytecode) payload.bytecode = (0, _rskUtils.add0x)(payload.bytecode);
+      const { version, imports, bytecode, source, libraries, name, constructorArguments } = payload;
       if (!name) throw new Error('Invalid contract name');
       if (!bytecode) throw new Error(`Invalid bytecode`);
       const KEY = name;
@@ -45,8 +42,8 @@ function Verifier(options = {}) {
       if (!contracts || !contracts[KEY]) throw new Error('Empty compilation result');
       const compiled = contracts[KEY][name];
       const { evm, abi } = compiled;
-
-      const { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata } = verifyResults(KEY, bytecode, evm, deployedBytecode, libraries);
+      const vargs = { contractName: KEY, bytecode, evm, libraries, constructorArguments, abi };
+      const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata } = verifyResults(vargs);
       if (!resultBytecode) throw new Error('Invalid result ');
       const resultBytecodeHash = (0, _utils.getHash)(resultBytecode);
       const bytecodeHash = (0, _utils.getHash)(orgBytecode);
@@ -59,7 +56,6 @@ function Verifier(options = {}) {
         usedSettings,
         usedLibraries,
         bytecode,
-        metadata,
         resultBytecode,
         bytecodeHash,
         resultBytecodeHash,
@@ -88,45 +84,37 @@ function filterResultErrors({ errors }) {
   return { errors, warnings };
 }
 
-function verifyResults(contractName, bytecode, evm, deployedBytecode, libs) {
-  let { bytecode: orgBytecode, metadata, decodedMetadata } = (0, _solidityMetadata.extractMetadataFromBytecode)(bytecode);
+function verifyResults({ contractName, bytecode, evm, libraries, constructorArguments, abi }) {
+  const metadataList = (0, _solidityMetadata.searchMetadata)(bytecode);
+  const constructorArgsEncoded = constructorArguments && abi ? (0, _constructor.encodeConstructorArgs)(constructorArguments, abi) : undefined;
+
   let evmBytecode = evm.bytecode.object;
-  let evmDeployedBytecode = evm.deployedBytecode.object;
-  const { usedLibraries, linkLibraries } = parseLibraries(libs, evmBytecode, contractName);
+  const { usedLibraries, linkLibraries } = parseLibraries(libraries, evmBytecode, contractName);
 
   if (Object.keys(linkLibraries).length > 0) {
     evmBytecode = _linker.default.link(evmBytecode, linkLibraries);
-    evmDeployedBytecode = _linker.default.link(evmDeployedBytecode, linkLibraries);
   }
-  let { bytecode: resultBytecode } = (0, _solidityMetadata.extractMetadataFromBytecode)(evmBytecode);
 
-  /**
-                                                                                                        * To contain solidity compiler metadata bug, if deployedBytecode
-                                                                                                        * is provided, try to extract metadata from it
-                                                                                                        */
+  const resultMetadataList = (0, _solidityMetadata.searchMetadata)(evmBytecode);
 
-  if (deployedBytecode) {
-    if (!metadata || resultBytecode !== orgBytecode) {
-      // extract metadata from original deployed bytecode
-      const deployedBytecodeResult = (0, _solidityMetadata.extractMetadataFromBytecode)(deployedBytecode);
-      metadata = deployedBytecodeResult.metadata;
-      decodedMetadata = deployedBytecodeResult.decodedMetadata;
-      // remove metadata from original bytecode searching extracted metadata
-      orgBytecode = removeMetadata(bytecode, metadata);
-      // extract metadata from compiled deployed bytecode
-      const { metadata: compiledMetadata } = (0, _solidityMetadata.extractMetadataFromBytecode)(evmDeployedBytecode);
-      // remove metadata from compiled bytecode using extracted metadata
-      resultBytecode = (0, _utils.add0x)(evmBytecode);
-      resultBytecode = removeMetadata(resultBytecode, compiledMetadata);
+  /*   if (metadataList.length !== resultMetadataList.length) {
+      throw new Error('invalid metadata list length')
+    } */
+
+  let decodedMetadata = metadataList.map(m => (0, _solidityMetadata.isValidMetadata)(m));
+  for (let i in metadataList) {
+    if (decodedMetadata[i] && resultMetadataList[i].length === metadataList[i].length && (0, _solidityMetadata.isValidMetadata)(metadataList[i])) {
+      resultMetadataList[i] = metadataList[i];
     }
   }
 
-  return { resultBytecode, orgBytecode, metadata, usedLibraries, decodedMetadata };
-}
+  // Add constructor args to bytecode
+  if (constructorArgsEncoded) resultMetadataList.push(constructorArgsEncoded);
 
-function removeMetadata(bytecode, metadata) {
-  const metadataStart = metadata.length;
-  return metadataStart > 0 ? bytecode.substr(0, metadataStart) : bytecode;
+  const resultBytecode = (0, _rskUtils.add0x)(resultMetadataList.join(''));
+  decodedMetadata = decodedMetadata.filter(m => m);
+  const orgBytecode = (0, _rskUtils.add0x)(bytecode);
+  return { resultBytecode, orgBytecode, usedLibraries, decodedMetadata };
 }
 
 function removeLibraryPrefix(lib) {
