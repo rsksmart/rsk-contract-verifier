@@ -46,8 +46,10 @@ export const decodeMetadata = metadata => {
     const decoded = cbor.decodeFirstSync(metadata.toString('hex').slice(0, -4))
     if (typeof decoded !== 'object') throw (new Error('Decode fail'))
     for (let p in decoded) {
-      const value = decoded[p]
-      if (typeof value !== 'number') decoded[p] = remove0x(toHexString(value))
+      let value = decoded[p]
+      if (Buffer.isBuffer(value)) value = value.toString('hex')
+      if (typeof value === 'string') value = remove0x(toHexString(value))
+      decoded[p] = value
     }
     return decoded
   } catch (err) {
