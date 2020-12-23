@@ -1,4 +1,4 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _getSolc = _interopRequireDefault(require("./getSolc"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.Compiler = Compiler;exports.default = void 0;var _getSolc = _interopRequireDefault(require("./getSolc"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 function Compiler({ solcCache } = {}) {
   const getSolc = (0, _getSolc.default)({ solcCache });

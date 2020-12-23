@@ -1,6 +1,6 @@
 {
   "name": "@rsksmart/rsk-contract-verifier",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Smart contract source code verifier",
   "main": "dist/index.js",
   "scripts": {
