@@ -2,7 +2,7 @@
   "name": "@rsksmart/rsk-contract-verifier",
   "version": "1.0.0",
   "description": "Smart contract source code verifier",
-  "main": "",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "npx nodemon src/contract-verifier-api.js | npx bunyan -o short",
     "build": "npm run clean && npm run lint && npx babel src -d dist --copy-files",

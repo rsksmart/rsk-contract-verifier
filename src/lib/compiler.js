@@ -1,6 +1,6 @@
 import GetSolc from './getSolc'
 
-function Compiler ({ solcCache } = {}) {
+export function Compiler ({ solcCache } = {}) {
   const getSolc = GetSolc({ solcCache })
 
   const createInput = ({ sources, settings } = {}) => {
