@@ -2,10 +2,9 @@ import defaultConfig from './defaultConfig'
 import path from 'path'
 import fs from 'fs'
 
-const config = Object.assign(defaultConfig, loadConfig())
-createDirs(config)
+export const config = create()
 
-function loadConfig () {
+export function load () {
   let config = {}
   try {
     let file = path.resolve(__dirname, '../../config.json')
@@ -17,7 +16,7 @@ function loadConfig () {
   return config
 }
 
-function createDirs (config) {
+export function createDirs (config) {
   const { log } = config
   if (log.file) {
     const dir = path.dirname(log.file)
@@ -25,6 +24,13 @@ function createDirs (config) {
       fs.mkdirSync(dir)
     }
   }
+}
+
+export function create (userConfig) {
+  userConfig = userConfig || load()
+  const config = Object.assign(defaultConfig, userConfig)
+  createDirs(config)
+  return config
 }
 
 export default config
