@@ -1,8 +1,6 @@
 import Verifier from './verifier'
 import config from './config'
 
-const verifier = Verifier(config)
-
 export const resolver = (imports) => (path) => {
   if (!imports) return
   const parts = path.split('/')
@@ -12,6 +10,9 @@ export const resolver = (imports) => (path) => {
   return { contents }
 }
 
-export const verifyParams = params => verifier.verify(params, { resolveImports: resolver(params.imports) })
+export const verifyParams = (params, verifier) => {
+  verifier = verifier || Verifier(config)
+  return verifier.verify(params, { resolveImports: resolver(params.imports) })
+}
 
 export default verifyParams
