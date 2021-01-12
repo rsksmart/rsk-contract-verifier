@@ -23,6 +23,8 @@ export function GetSolc ({ solcCache, solcUrl, listUrl }) {
 
   const getVersionUrl = fileName => `${solcUrl}/${fileName}`
 
+  const isValidHash = (code, hash) => getHash(code, 'utf8') === hash
+
   const getList = async () => {
     if (!versionsList) await setVersionsLists()
     else setVersionsLists()
@@ -57,7 +59,7 @@ export function GetSolc ({ solcCache, solcUrl, listUrl }) {
       if (!versionData) throw new Error(`Unkown version ${version}`)
       const { keccak256, path: fileName } = versionData
       let code = await loadFromDisk(fileName)
-      if (!code) code = await downloadAndSave(fileName, keccak256)
+      if (!code || !isValidHash(code, keccak256)) code = await downloadAndSave(fileName, keccak256)
       const snapshot = requireFromString(code, fileName)
       return solc.setupMethods(snapshot)
     } catch (err) {
@@ -100,8 +102,8 @@ export function GetSolc ({ solcCache, solcUrl, listUrl }) {
     try {
       const url = getVersionUrl(fileName)
       const code = await download(url)
-      const hash = getHash(code, 'utf8')
-      if (hash === versionHash) return code
+      if (!isValidHash(code, versionHash)) throw new Error(`Invalid hash ${fileName}`)
+      return code
     } catch (err) {
       return Promise.reject(err)
     }
