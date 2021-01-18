@@ -19,6 +19,11 @@ describe('# constructor', function () {
       const abi = [1, 2, constructor]
       expect(getConstructorAbi(abi)).to.be.deep.equal(constructor)
     })
+
+    it('should return undefined', () => {
+      expect(getConstructorAbi([{ type: 'function' }, { b: 2 }])).to.be.deep.equal(undefined)
+      expect(getConstructorAbi([])).to.be.deep.equal(undefined)
+    })
   })
 
   describe('getTypesFromAbi, ', function () {

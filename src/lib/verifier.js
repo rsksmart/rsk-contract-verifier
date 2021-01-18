@@ -3,7 +3,8 @@ import linker from './linker'
 import { getHash } from './utils'
 import { add0x } from '@rsksmart/rsk-utils'
 import { isValidMetadata, searchMetadata } from './solidityMetadata'
-import { encodeConstructorArgs } from './constructor'
+import { decodeConstructorArgs, encodeConstructorArgs } from './constructor'
+import { remove0x } from '@rsksmart/rsk-utils/dist/strings'
 
 const SEVERITY_WARNING = 'warning'
 
@@ -13,7 +14,7 @@ export function Verifier (options = {}) {
   const verify = async (payload = {}, { resolveImports } = {}) => {
     try {
       if (payload.bytecode) payload.bytecode = add0x(payload.bytecode)
-      const { version, imports, bytecode, source, libraries, name, constructorArguments } = payload
+      const { version, imports, bytecode, source, libraries, name, constructorArguments, encodedConstructorArguments } = payload
       if (!name) throw new Error('Invalid contract name')
       if (!bytecode) throw new Error(`Invalid bytecode`)
       const KEY = name
@@ -42,7 +43,7 @@ export function Verifier (options = {}) {
       if (!contracts || !contracts[KEY]) throw new Error('Empty compilation result')
       const compiled = contracts[KEY][name]
       const { evm, abi } = compiled
-      const vargs = { contractName: KEY, bytecode, evm, libraries, constructorArguments, abi }
+      const vargs = { contractName: KEY, bytecode, evm, libraries, constructorArguments, encodedConstructorArguments, abi }
       const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata } = verifyResults(vargs)
       if (!resultBytecode) throw new Error('Invalid result ')
       const resultBytecodeHash = getHash(resultBytecode)
@@ -84,9 +85,23 @@ export function filterResultErrors ({ errors }) {
   return { errors, warnings }
 }
 
-export function verifyResults ({ contractName, bytecode, evm, libraries, constructorArguments, abi }) {
+export function parseConstructorArguments ({ constructorArguments, encodedConstructorArguments, abi }) {
+  let encoded, decoded
+  if (abi && (encodeConstructorArgs || constructorArguments)) {
+    if (encodedConstructorArguments) {
+      encoded = encodedConstructorArguments
+      decoded = decodeConstructorArgs(encodedConstructorArguments, abi)
+    }
+    if (!encoded && constructorArguments) encoded = encodeConstructorArgs(constructorArguments, abi)
+    if (!decoded && encoded) decoded = decodeConstructorArgs(encoded, abi)
+  }
+  return { encoded, decoded }
+}
+
+export function verifyResults (payload) {
+  const { contractName, bytecode, evm, libraries } = payload
+  const { decoded: constructorArguments, encoded: encodedConstructorArguments } = parseConstructorArguments(payload)
   const metadataList = searchMetadata(bytecode)
-  const constructorArgsEncoded = (constructorArguments && abi) ? encodeConstructorArgs(constructorArguments, abi) : undefined
 
   let evmBytecode = evm.bytecode.object
   const { usedLibraries, linkLibraries } = parseLibraries(libraries, evmBytecode, contractName)
@@ -109,12 +124,12 @@ export function verifyResults ({ contractName, bytecode, evm, libraries, constru
   }
 
   // Add constructor args to bytecode
-  if (constructorArgsEncoded) resultMetadataList.push(constructorArgsEncoded)
+  if (encodedConstructorArguments) resultMetadataList.push(remove0x(encodedConstructorArguments))
 
   const resultBytecode = add0x(resultMetadataList.join(''))
   decodedMetadata = decodedMetadata.filter(m => m)
   const orgBytecode = add0x(bytecode)
-  return { resultBytecode, orgBytecode, usedLibraries, decodedMetadata }
+  return { resultBytecode, orgBytecode, usedLibraries, decodedMetadata, encodedConstructorArguments, constructorArguments }
 }
 
 export function removeLibraryPrefix (lib) {

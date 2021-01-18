@@ -9,8 +9,22 @@ const abiCoder = new AbiCoder(function (type, value) {
   return value
 })
 
-const encode = (types, value) => remove0x(abiCoder.encode(types, value))
-const decode = (types, value) => abiCoder.decode(types, value, true)
+const encode = (types, value) => {
+  try {
+    const decoded = abiCoder.encode(types, value)
+    return decoded ? remove0x(decoded) : decoded
+  } catch (err) {
+    return undefined
+  }
+}
+const decode = (types, value) => {
+  try {
+    const decoded = abiCoder.decode(types, value)
+    return decoded
+  } catch (err) {
+    return undefined
+  }
+}
 
 export const getConstructorAbi = abi => abi.filter(x => x.type === 'constructor')[0]
 
@@ -27,7 +41,7 @@ export const encodeConstructorArgs = (args, abi) => {
     args[p] = value
   }
   const encoded = encode(types, args)
-  return encoded.toString('hex')
+  return encoded ? encoded.toString('hex') : encoded
 }
 
 export const normalizeOutput = out => {
@@ -40,6 +54,5 @@ export const normalizeOutput = out => {
 export const decodeConstructorArgs = (encoded, abi) => {
   const types = getConstructorTypes(abi)
   let decoded = decode(types, toBuffer(encoded))
-  decoded = normalizeOutput(decoded)
-  return decoded
+  return decoded ? normalizeOutput(decoded) : decoded
 }
