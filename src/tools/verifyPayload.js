@@ -1,25 +1,29 @@
 import { verifyParams } from '../lib/verifyFromPayload'
-import { showResult, isVerified } from './lib'
-import path from 'path'
-import fs from 'fs'
-import util from 'util'
-const readFile = util.promisify(fs.readFile)
-const writeFile = util.promisify(fs.writeFile)
-const file = process.argv[2]
-const autofix = process.argv[3] === '--fix'
+import { showResult, isVerified, label, parseArg, readFile, writeFile, saveOutput, getArgs } from './lib'
 
-if (!file) help()
+const file = process.argv[2]
+
+const opts = {
+  OUT: 'save',
+  HELP: 'help',
+  AUTOFIX: 'fix'
+}
+
+const args = getArgs(opts, process.argv.slice(3))
+args.HELP = parseArg(opts, process.argv)
+
+if (args.HELP || !file) showHelp()
 
 verify(file).then(() => process.exit(0))
 
 async function verify (file) {
   try {
-    let payload = await readFile(path.resolve(file))
+    let payload = await readFile(file)
     payload = JSON.parse(payload.toString())
     let verification = await verifyParams(payload)
 
     // Auto add constructor arguments
-    if (!isVerified(verification) && verification.tryThis && autofix) {
+    if (!isVerified(verification) && verification.tryThis && args.AUTOFIX) {
       const { encodedConstructorArguments, constructorArguments } = verification.tryThis
       if (constructorArguments) {
         payload.constructorArguments = constructorArguments
@@ -29,24 +33,32 @@ async function verify (file) {
       verification = await verifyParams(payload)
       if (isVerified(verification)) {
         await writeFile(file, JSON.stringify(payload, null, 4))
-        console.log(`------------- The arguments were saved in ${file} -------------`)
+        console.log(label(`The arguments were saved in ${file}`))
       }
     }
-    showResult(verification)
+    if (args.OUT) {
+      const outFile = await saveOutput(args.OUT, verification, file)
+      console.log(label(`The result was saved in ${outFile}`))
+      showResult(verification)
+    } else {
+      showResult(verification, true)
+    }
   } catch (err) {
     console.error(err)
     process.exit(9)
   }
 }
 
-function help () {
+function showHelp () {
   console.log()
   console.log('Usage:')
   console.log()
-  console.log(`${process.argv[0]} ${process.argv[1]} <path to payload.file.json> [--fix]`)
+  console.log(`${process.argv[0]} ${process.argv[1]} <path to payload.file.json> [--${opts.AUTOFIX} ---${opts.OUT} ]`)
   console.log()
-  console.log('--fix: Automatically adds verifier suggestions to payload and check again,')
+  console.log(`--${opts.AUTOFIX} -> Automatically adds verifier suggestions to payload and check again,`)
   console.log('       if the verification succeeds, it saves the modified payload to the file.')
+  console.log()
+  console.log(`--${opts.OUT} | --${opts.OUT}=fileName -> Saves output to file.`)
   console.log()
   process.exit(0)
 }

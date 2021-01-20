@@ -1,5 +1,13 @@
 
+import path from 'path'
+import fs from 'fs'
+import util from 'util'
 import { isHexString } from '@rsksmart/rsk-utils'
+export const writeFile = util.promisify(fs.writeFile)
+
+export function readFile (file) {
+  return util.promisify(fs.readFile)(path.resolve(file))
+}
 
 export function isVerified ({ bytecodeHash, resultBytecodeHash }) {
   try {
@@ -11,12 +19,12 @@ export function isVerified ({ bytecodeHash, resultBytecodeHash }) {
   }
 }
 
-export function showResult (result) {
+export function showResult (result, full) {
   try {
     if (!result || typeof result !== 'object') throw new Error('Empty result')
     let { errors, warnings } = result
     let { bytecodeHash, resultBytecodeHash } = result
-    console.log(JSON.stringify(result, null, 2))
+    if (full) console.log(JSON.stringify(result, null, 2))
     if (isVerified(result)) {
       console.log()
       console.log()
@@ -25,7 +33,7 @@ export function showResult (result) {
       console.log()
       console.log(JSON.stringify({ bytecodeHash, resultBytecodeHash }, null, 2))
     } else {
-      console.log('Verification failed')
+      console.log(label('Verification failed', '='))
       if (result.tryThis) {
         console.log()
         console.log('Please try again using some of these parameters:')
@@ -47,6 +55,45 @@ export function showResult (result) {
   }
 }
 
-function label (txt) {
-  return `------------- ${txt} --------------`
+export function label (txt, char = '-') {
+  const l = char.repeat(13)
+  return `${l} ${txt} ${l}`
+}
+
+export function parseArg (args, key) {
+  if (!Array.isArray(args)) return
+  if (!key) return
+  key = `--${key}`
+  let a = args.find(v => v.startsWith(key))
+  if (a) {
+    a = a.split('=').pop()
+    return (a === key) || a
+  }
+}
+
+function addExtension (file, extension) {
+  file = file.split('.')
+  if (file[file.length - 1] === extension) file.pop()
+  file = file.join('')
+  file = `${file}.${extension}`
+  return file
+}
+
+export async function saveOutput (file, content) {
+  try {
+    file = (typeof file === 'string') ? file : `${Date.now()}--verifier-out`
+    file = addExtension(file, 'json')
+    await writeFile(file, JSON.stringify(content, null, 4))
+    return file
+  } catch (err) {
+    return Promise.reject(err)
+  }
+}
+
+export function getArgs (options, userArgs) {
+  const args = {}
+  for (let o in options) {
+    args[o] = parseArg(userArgs, o)
+  }
+  return args
 }
