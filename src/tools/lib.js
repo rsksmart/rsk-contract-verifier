@@ -1,10 +1,23 @@
+
+import { isHexString } from '@rsksmart/rsk-utils'
+
+export function isVerified ({ bytecodeHash, resultBytecodeHash }) {
+  try {
+    if (!isHexString(bytecodeHash) || !isHexString(resultBytecodeHash)) return false
+    if ((bytecodeHash.lenght < 64 || resultBytecodeHash.lenght < 66)) return false
+    return (bytecodeHash === resultBytecodeHash)
+  } catch (error) {
+    return false
+  }
+}
+
 export function showResult (result) {
   try {
     if (!result || typeof result !== 'object') throw new Error('Empty result')
     let { errors, warnings } = result
     let { bytecodeHash, resultBytecodeHash } = result
     console.log(JSON.stringify(result, null, 2))
-    if ((bytecodeHash && resultBytecodeHash) && (bytecodeHash === resultBytecodeHash)) {
+    if (isVerified(result)) {
       console.log()
       console.log()
       let ww = (warnings) ? '(with warnings)' : ''
