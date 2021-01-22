@@ -1,11 +1,10 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _defaultConfig = _interopRequireDefault(require("./defaultConfig"));
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.load = load;exports.createDirs = createDirs;exports.create = create;exports.default = exports.config = void 0;var _defaultConfig = _interopRequireDefault(require("./defaultConfig"));
 var _path = _interopRequireDefault(require("path"));
 var _fs = _interopRequireDefault(require("fs"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
-const config = Object.assign(_defaultConfig.default, loadConfig());
-createDirs(config);
+const config = create();exports.config = config;
 
-function loadConfig() {
+function load() {
   let config = {};
   try {
     let file = _path.default.resolve(__dirname, '../../config.json');
@@ -25,6 +24,13 @@ function createDirs(config) {
       _fs.default.mkdirSync(dir);
     }
   }
+}
+
+function create(userConfig) {
+  userConfig = userConfig || load();
+  const config = Object.assign(_defaultConfig.default, userConfig);
+  createDirs(config);
+  return config;
 }var _default =
 
 config;exports.default = _default;
