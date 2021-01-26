@@ -25,6 +25,7 @@
   "homepage": "https://github.com/rsksmart/rsk-contract-verifier",
   "dependencies": {
     "@ethersproject/abi": "^5.0.9",
+    "@rsksmart/rsk-js-cli": "^1.0.0",
     "@rsksmart/rsk-utils": "^1.1.0",
     "axios": "^0.21.1",
     "bn.js": "^5.1.3",

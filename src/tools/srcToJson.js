@@ -1,35 +1,24 @@
 import path from 'path'
-import fs from 'fs'
-import util from 'util'
-const readFile = util.promisify(fs.readFile)
-const readDir = util.promisify(fs.readdir)
+import { readFile, readDir } from './lib'
+import { argKey, getArgs } from '@rsksmart/rsk-js-cli'
 
-const args = {
-  file: 'Main .sol file',
-  dir: '[optional] path to imported .sol files.',
-  payload: '[optional] base payload'
+const opts = {
+  FILE: 'file',
+  DIR: 'dir',
+  PAYLOAD: 'payload'
 }
 
-let { file, dir, payload } = parseArguments()
-payload = payload || path.join(__dirname, 'payload.example.json')
-
-if (!file) help()
-convert(file, dir, payload).then(() => process.exit(0))
-
-function argKey (name) {
-  return `--${name}=`
+const descs = {
+  FILE: 'Main .sol file',
+  DIR: '[optional] path to imported .sol files.',
+  PAYLOAD: '[optional] base payload'
 }
 
-function parseArguments () {
-  const { argv } = process
-  const parsed = {}
-  for (let a in args) {
-    let key = argKey(a)
-    let arg = argv.find(ar => ar.startsWith(key))
-    if (arg) parsed[a] = arg.replace(key, '')
-  }
-  return parsed
-}
+let { FILE, DIR, PAYLOAD } = getArgs(opts, process.argv)
+PAYLOAD = PAYLOAD || path.join(__dirname, 'payload.example.json')
+
+if (typeof file !== 'string') help()
+convert(FILE, DIR, PAYLOAD).then(() => process.exit(0))
 
 async function loadFile (file) {
   let content = await readFile(path.resolve(file))
@@ -68,8 +57,15 @@ async function loadImports (dir) {
 }
 
 function help () {
-  const ars = Object.entries(args).map(([name, desc]) => `${argKey(name)}${desc}`)
+  const parameters = Object.keys(opts).map(k => {
+    return [argKey(opts[k]), descs[k]]
+  })
   console.log('Usage:')
-  console.log(`${process.argv[0]} ${process.argv[1]} ${ars.join(' ')}`)
+  console.log(`${process.argv[0]} ${process.argv[1]} [ ${parameters.map(([k, d]) => `${k}=<...>`).join(' ')} ]`)
+  console.log()
+  for (const [o, t] of parameters) {
+    console.log(`${o}: ${t}`)
+  }
+  console.log()
   process.exit(0)
 }

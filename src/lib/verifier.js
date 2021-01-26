@@ -4,7 +4,8 @@ import { getHash } from './utils'
 import { add0x } from '@rsksmart/rsk-utils'
 import { isValidMetadata, searchMetadata } from './solidityMetadata'
 import { decodeConstructorArgs, encodeConstructorArgs, getConstructorAbi } from './constructor'
-import { remove0x } from '@rsksmart/rsk-utils/dist/strings'
+import { remove0x, isHexString } from '@rsksmart/rsk-utils/dist/strings'
+import { assert } from 'chai'
 
 const SEVERITY_WARNING = 'warning'
 
@@ -220,6 +221,18 @@ export function resultSettings (compiled) {
   const { compiler, language, settings } = JSON.parse(compiled.metadata)
   const { evmVersion, libraries, optimizer, remappings } = settings
   return { compiler, language, evmVersion, libraries, optimizer, remappings }
+}
+
+export function isVerified ({ bytecodeHash, resultBytecodeHash }) {
+  try {
+    assert.deepEqual(isHexString(bytecodeHash), true)
+    assert.deepEqual(isHexString(resultBytecodeHash), true)
+    assert.deepEqual(bytecodeHash.length, 66)
+    assert.deepEqual(bytecodeHash, resultBytecodeHash)
+    return bytecodeHash === resultBytecodeHash
+  } catch (err) {
+    return false
+  }
 }
 
 export default Verifier

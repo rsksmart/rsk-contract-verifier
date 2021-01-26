@@ -1,23 +1,15 @@
 
+import { isVerified } from '../lib/verifier'
+import { verifyParams } from '../lib/verifyFromPayload'
+import { tag, log } from '@rsksmart/rsk-js-cli'
 import path from 'path'
 import fs from 'fs'
 import util from 'util'
-import { isHexString } from '@rsksmart/rsk-utils'
 export const writeFile = util.promisify(fs.writeFile)
 
-export function readFile (file) {
-  return util.promisify(fs.readFile)(path.resolve(file))
-}
+export const readFile = file => util.promisify(fs.readFile)(path.resolve(file))
 
-export function isVerified ({ bytecodeHash, resultBytecodeHash }) {
-  try {
-    if (!isHexString(bytecodeHash) || !isHexString(resultBytecodeHash)) return false
-    if ((bytecodeHash.lenght < 64 || resultBytecodeHash.lenght < 66)) return false
-    return (bytecodeHash === resultBytecodeHash)
-  } catch (error) {
-    return false
-  }
-}
+export const readDir = util.promisify(fs.readdir)
 
 export function showResult (result, full) {
   try {
@@ -28,46 +20,32 @@ export function showResult (result, full) {
     if (isVerified(result)) {
       console.log()
       console.log()
-      let ww = (warnings) ? '(with warnings)' : ''
-      console.log(label(` The source code was verified! ${ww}`))
+      const ww = (warnings) ? '(with warnings)' : ''
+      const msg = tag(` The source code was verified! ${ww}`)
+      if (ww) log.warn(msg)
+      else log.ok(msg)
       console.log()
-      console.log(JSON.stringify({ bytecodeHash, resultBytecodeHash }, null, 2))
+      log.label(JSON.stringify({ bytecodeHash, resultBytecodeHash }, null, 2))
     } else {
-      console.log(label('Verification failed', '='))
+      log.error(tag('Verification failed', '='))
       if (result.tryThis) {
         console.log()
-        console.log('Please try again using some of these parameters:')
-        console.log(JSON.stringify(result.tryThis, null, 2))
+        log.info('Please try again using some of these parameters:')
+        log.info(JSON.stringify(result.tryThis, null, 2))
       }
     }
     if (errors) {
-      console.error(label('Errors'))
+      console.error(tag('Errors'))
       console.error(JSON.stringify(errors, null, 2))
     }
     if (warnings) {
-      console.warn(label('Warnings'))
-      console.error(JSON.stringify(warnings, null, 2))
+      log.warn(tag('Warnings'))
+      log.error(JSON.stringify(warnings, null, 2))
     }
     process.exit(0)
   } catch (err) {
     console.error(err)
     process.exit(9)
-  }
-}
-
-export function label (txt, char = '-') {
-  const l = char.repeat(13)
-  return `${l} ${txt} ${l}`
-}
-
-export function parseArg (args, key) {
-  if (!Array.isArray(args)) return
-  if (!key) return
-  key = `--${key}`
-  let a = args.find(v => v.startsWith(key))
-  if (a) {
-    a = a.split('=').pop()
-    return (a === key) || a
   }
 }
 
@@ -90,10 +68,33 @@ export async function saveOutput (file, content) {
   }
 }
 
-export function getArgs (options, userArgs) {
-  const args = {}
-  for (let o in options) {
-    args[o] = parseArg(userArgs, o)
+export async function verify (file, options) {
+  try {
+    let payload = await readFile(file)
+    payload = JSON.parse(payload.toString())
+    let verification = await verifyParams(payload)
+
+    // Auto add constructor arguments
+    if (!isVerified(verification) && verification.tryThis && options.AUTOFIX) {
+      const { encodedConstructorArguments, constructorArguments } = verification.tryThis
+      if (constructorArguments) {
+        payload.constructorArguments = constructorArguments
+      } else if (encodedConstructorArguments) {
+        payload.encodedConstructorArguments = encodedConstructorArguments
+      }
+      verification = await verifyParams(payload)
+      if (isVerified(verification)) {
+        await writeFile(file, JSON.stringify(payload, null, 4))
+        log.info(tag(`The arguments were saved in ${file}`))
+      }
+    }
+    if (options.OUT_FILE) {
+      const outFile = await saveOutput(options.OUT_FILE, verification, file)
+      log.info(tag(`The result was saved in ${outFile}`))
+    }
+    showResult(verification, options.SHOW)
+  } catch (err) {
+    console.error(err)
+    process.exit(9)
   }
-  return args
 }
