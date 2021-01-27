@@ -1,64 +1,38 @@
-"use strict";var _verifyFromPayload = require("../lib/verifyFromPayload");
-var _lib = require("./lib");
+"use strict";var _lib = require("./lib");
+var _rskJsCli = require("@rsksmart/rsk-js-cli");
 
 const file = process.argv[2];
 
 const opts = {
-  OUT: 'save',
-  HELP: 'help',
-  AUTOFIX: 'fix' };
+  OUT_FILE: 'save',
+  AUTOFIX: 'fix',
+  SHOW: 'show' };
 
 
-const args = (0, _lib.getArgs)(opts, process.argv.slice(3));
-args.HELP = (0, _lib.parseArg)(opts, process.argv);
-
+const args = (0, _rskJsCli.getArgs)(opts, process.argv.slice(3));
+args.HELP = (0, _rskJsCli.parseArg)(process.argv, 'help');
 if (args.HELP || !file) showHelp();
 
-verify(file).then(() => process.exit(0));
-
-async function verify(file) {
-  try {
-    let payload = await (0, _lib.readFile)(file);
-    payload = JSON.parse(payload.toString());
-    let verification = await (0, _verifyFromPayload.verifyParams)(payload);
-
-    // Auto add constructor arguments
-    if (!(0, _lib.isVerified)(verification) && verification.tryThis && args.AUTOFIX) {
-      const { encodedConstructorArguments, constructorArguments } = verification.tryThis;
-      if (constructorArguments) {
-        payload.constructorArguments = constructorArguments;
-      } else if (encodedConstructorArguments) {
-        payload.encodedConstructorArguments = encodedConstructorArguments;
-      }
-      verification = await (0, _verifyFromPayload.verifyParams)(payload);
-      if ((0, _lib.isVerified)(verification)) {
-        await (0, _lib.writeFile)(file, JSON.stringify(payload, null, 4));
-        console.log((0, _lib.label)(`The arguments were saved in ${file}`));
-      }
-    }
-    if (args.OUT) {
-      const outFile = await (0, _lib.saveOutput)(args.OUT, verification, file);
-      console.log((0, _lib.label)(`The result was saved in ${outFile}`));
-      (0, _lib.showResult)(verification);
-    } else {
-      (0, _lib.showResult)(verification, true);
-    }
-  } catch (err) {
-    console.error(err);
-    process.exit(9);
-  }
-}
+(0, _lib.verify)(file, args).
+then(() => process.exit(0)).
+catch(err => {
+  console.error(err);
+  process.exit(9);
+});
 
 function showHelp() {
+  const parameters = Object.values(opts).map(key => (0, _rskJsCli.argKey)(key));
   console.log();
   console.log('Usage:');
   console.log();
-  console.log(`${process.argv[0]} ${process.argv[1]} <path to payload.file.json> [--${opts.AUTOFIX} ---${opts.OUT} ]`);
+  console.log(`${process.argv[0]} ${process.argv[1]} <path to payload.file.json> [ ${parameters.join(' ')} ]`);
   console.log();
   console.log(`--${opts.AUTOFIX} -> Automatically adds verifier suggestions to payload and check again,`);
   console.log('       if the verification succeeds, it saves the modified payload to the file.');
   console.log();
-  console.log(`--${opts.OUT} | --${opts.OUT}=fileName -> Saves output to file.`);
+  console.log(`--${opts.OUT_FILE} | --${opts.OUT_FILE}=fileName -> Saves result to file.`);
+  console.log();
+  console.log(`--${opts.SHOW} -> Show result.`);
   console.log();
   process.exit(0);
 }

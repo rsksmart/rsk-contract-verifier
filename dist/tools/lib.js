@@ -1,23 +1,15 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.readFile = readFile;exports.isVerified = isVerified;exports.showResult = showResult;exports.label = label;exports.parseArg = parseArg;exports.saveOutput = saveOutput;exports.getArgs = getArgs;exports.writeFile = void 0;
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.showResult = showResult;exports.saveOutput = saveOutput;exports.verify = verify;exports.readDir = exports.readFile = exports.writeFile = void 0;
+var _verifier = require("../lib/verifier");
+var _verifyFromPayload = require("../lib/verifyFromPayload");
+var _rskJsCli = require("@rsksmart/rsk-js-cli");
 var _path = _interopRequireDefault(require("path"));
 var _fs = _interopRequireDefault(require("fs"));
-var _util = _interopRequireDefault(require("util"));
-var _rskUtils = require("@rsksmart/rsk-utils");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _util = _interopRequireDefault(require("util"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 const writeFile = _util.default.promisify(_fs.default.writeFile);exports.writeFile = writeFile;
 
-function readFile(file) {
-  return _util.default.promisify(_fs.default.readFile)(_path.default.resolve(file));
-}
+const readFile = file => _util.default.promisify(_fs.default.readFile)(_path.default.resolve(file));exports.readFile = readFile;
 
-function isVerified({ bytecodeHash, resultBytecodeHash }) {
-  try {
-    if (!(0, _rskUtils.isHexString)(bytecodeHash) || !(0, _rskUtils.isHexString)(resultBytecodeHash)) return false;
-    if (bytecodeHash.lenght < 64 || resultBytecodeHash.lenght < 66) return false;
-    return bytecodeHash === resultBytecodeHash;
-  } catch (error) {
-    return false;
-  }
-}
+const readDir = _util.default.promisify(_fs.default.readdir);exports.readDir = readDir;
 
 function showResult(result, full) {
   try {
@@ -25,49 +17,35 @@ function showResult(result, full) {
     let { errors, warnings } = result;
     let { bytecodeHash, resultBytecodeHash } = result;
     if (full) console.log(JSON.stringify(result, null, 2));
-    if (isVerified(result)) {
+    if ((0, _verifier.isVerified)(result)) {
       console.log();
       console.log();
-      let ww = warnings ? '(with warnings)' : '';
-      console.log(label(` The source code was verified! ${ww}`));
+      const ww = warnings ? '(with warnings)' : '';
+      const msg = (0, _rskJsCli.tag)(` The source code was verified! ${ww}`);
+      if (ww) _rskJsCli.log.warn(msg);else
+      _rskJsCli.log.ok(msg);
       console.log();
-      console.log(JSON.stringify({ bytecodeHash, resultBytecodeHash }, null, 2));
+      _rskJsCli.log.label(JSON.stringify({ bytecodeHash, resultBytecodeHash }, null, 2));
     } else {
-      console.log(label('Verification failed', '='));
+      _rskJsCli.log.error((0, _rskJsCli.tag)('Verification failed', '='));
       if (result.tryThis) {
         console.log();
-        console.log('Please try again using some of these parameters:');
-        console.log(JSON.stringify(result.tryThis, null, 2));
+        _rskJsCli.log.info('Please try again using some of these parameters:');
+        _rskJsCli.log.info(JSON.stringify(result.tryThis, null, 2));
       }
     }
     if (errors) {
-      console.error(label('Errors'));
+      console.error((0, _rskJsCli.tag)('Errors'));
       console.error(JSON.stringify(errors, null, 2));
     }
     if (warnings) {
-      console.warn(label('Warnings'));
-      console.error(JSON.stringify(warnings, null, 2));
+      _rskJsCli.log.warn((0, _rskJsCli.tag)('Warnings'));
+      _rskJsCli.log.error(JSON.stringify(warnings, null, 2));
     }
     process.exit(0);
   } catch (err) {
     console.error(err);
     process.exit(9);
-  }
-}
-
-function label(txt, char = '-') {
-  const l = char.repeat(13);
-  return `${l} ${txt} ${l}`;
-}
-
-function parseArg(args, key) {
-  if (!Array.isArray(args)) return;
-  if (!key) return;
-  key = `--${key}`;
-  let a = args.find(v => v.startsWith(key));
-  if (a) {
-    a = a.split('=').pop();
-    return a === key || a;
   }
 }
 
@@ -90,10 +68,33 @@ async function saveOutput(file, content) {
   }
 }
 
-function getArgs(options, userArgs) {
-  const args = {};
-  for (let o in options) {
-    args[o] = parseArg(userArgs, o);
+async function verify(file, options) {
+  try {
+    let payload = await readFile(file);
+    payload = JSON.parse(payload.toString());
+    let verification = await (0, _verifyFromPayload.verifyParams)(payload);
+
+    // Auto add constructor arguments
+    if (!(0, _verifier.isVerified)(verification) && verification.tryThis && options.AUTOFIX) {
+      const { encodedConstructorArguments, constructorArguments } = verification.tryThis;
+      if (constructorArguments) {
+        payload.constructorArguments = constructorArguments;
+      } else if (encodedConstructorArguments) {
+        payload.encodedConstructorArguments = encodedConstructorArguments;
+      }
+      verification = await (0, _verifyFromPayload.verifyParams)(payload);
+      if ((0, _verifier.isVerified)(verification)) {
+        await writeFile(file, JSON.stringify(payload, null, 4));
+        _rskJsCli.log.info((0, _rskJsCli.tag)(`The arguments were saved in ${file}`));
+      }
+    }
+    if (options.OUT_FILE) {
+      const outFile = await saveOutput(options.OUT_FILE, verification, file);
+      _rskJsCli.log.info((0, _rskJsCli.tag)(`The result was saved in ${outFile}`));
+    }
+    showResult(verification, options.SHOW);
+  } catch (err) {
+    console.error(err);
+    process.exit(9);
   }
-  return args;
 }

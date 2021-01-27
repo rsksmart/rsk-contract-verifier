@@ -1,10 +1,11 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.Verifier = Verifier;exports.filterResultErrors = filterResultErrors;exports.parseConstructorArguments = parseConstructorArguments;exports.verifyResults = verifyResults;exports.removeLibraryPrefix = removeLibraryPrefix;exports.getLibrariesPlaceHolders = getLibrariesPlaceHolders;exports.findLibrary = findLibrary;exports.parseLibraries = parseLibraries;exports.resultSettings = resultSettings;exports.default = void 0;var _compiler = _interopRequireDefault(require("./compiler"));
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.Verifier = Verifier;exports.filterResultErrors = filterResultErrors;exports.parseConstructorArguments = parseConstructorArguments;exports.verifyResults = verifyResults;exports.removeLibraryPrefix = removeLibraryPrefix;exports.getLibrariesPlaceHolders = getLibrariesPlaceHolders;exports.findLibrary = findLibrary;exports.parseLibraries = parseLibraries;exports.resultSettings = resultSettings;exports.isVerified = isVerified;exports.default = void 0;var _compiler = _interopRequireDefault(require("./compiler"));
 var _linker = _interopRequireDefault(require("./linker"));
 var _utils = require("./utils");
 var _rskUtils = require("@rsksmart/rsk-utils");
 var _solidityMetadata = require("./solidityMetadata");
 var _constructor = require("./constructor");
-var _strings = require("@rsksmart/rsk-utils/dist/strings");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _strings = require("@rsksmart/rsk-utils/dist/strings");
+var _chai = require("chai");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 const SEVERITY_WARNING = 'warning';
 
@@ -220,6 +221,18 @@ function resultSettings(compiled) {
   const { compiler, language, settings } = JSON.parse(compiled.metadata);
   const { evmVersion, libraries, optimizer, remappings } = settings;
   return { compiler, language, evmVersion, libraries, optimizer, remappings };
+}
+
+function isVerified({ bytecodeHash, resultBytecodeHash }) {
+  try {
+    _chai.assert.deepEqual((0, _strings.isHexString)(bytecodeHash), true);
+    _chai.assert.deepEqual((0, _strings.isHexString)(resultBytecodeHash), true);
+    _chai.assert.deepEqual(bytecodeHash.length, 66);
+    _chai.assert.deepEqual(bytecodeHash, resultBytecodeHash);
+    return bytecodeHash === resultBytecodeHash;
+  } catch (err) {
+    return false;
+  }
 }var _default =
 
 Verifier;exports.default = _default;

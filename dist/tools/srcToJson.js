@@ -1,38 +1,27 @@
 "use strict";var _path = _interopRequireDefault(require("path"));
-var _fs = _interopRequireDefault(require("fs"));
-var _util = _interopRequireDefault(require("util"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
-const readFile = _util.default.promisify(_fs.default.readFile);
-const readDir = _util.default.promisify(_fs.default.readdir);
+var _lib = require("./lib");
+var _rskJsCli = require("@rsksmart/rsk-js-cli");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
-const args = {
-  file: 'Main .sol file',
-  dir: '[optional] path to imported .sol files.',
-  payload: '[optional] base payload' };
+const opts = {
+  FILE: 'file',
+  DIR: 'dir',
+  PAYLOAD: 'payload' };
 
 
-let { file, dir, payload } = parseArguments();
-payload = payload || _path.default.join(__dirname, 'payload.example.json');
+const descs = {
+  FILE: 'Main .sol file',
+  DIR: '[optional] path to imported .sol files.',
+  PAYLOAD: '[optional] base payload' };
 
-if (!file) help();
-convert(file, dir, payload).then(() => process.exit(0));
 
-function argKey(name) {
-  return `--${name}=`;
-}
+let { FILE, DIR, PAYLOAD } = (0, _rskJsCli.getArgs)(opts, process.argv);
+PAYLOAD = PAYLOAD || _path.default.join(__dirname, 'payload.example.json');
 
-function parseArguments() {
-  const { argv } = process;
-  const parsed = {};
-  for (let a in args) {
-    let key = argKey(a);
-    let arg = argv.find(ar => ar.startsWith(key));
-    if (arg) parsed[a] = arg.replace(key, '');
-  }
-  return parsed;
-}
+if (typeof file !== 'string') help();
+convert(FILE, DIR, PAYLOAD).then(() => process.exit(0));
 
 async function loadFile(file) {
-  let content = await readFile(_path.default.resolve(file));
+  let content = await (0, _lib.readFile)(_path.default.resolve(file));
   if (content) return content.toString();
 }
 
@@ -56,7 +45,7 @@ async function loadImports(dir) {
   try {
     let imports = [];
     if (!dir) return imports;
-    let files = await readDir(_path.default.resolve(dir));
+    let files = await (0, _lib.readDir)(_path.default.resolve(dir));
     for (let name of files) {
       let contents = await loadFile(_path.default.resolve(dir, name));
       if (contents) imports.push({ name, contents });
@@ -68,8 +57,15 @@ async function loadImports(dir) {
 }
 
 function help() {
-  const ars = Object.entries(args).map(([name, desc]) => `${argKey(name)}${desc}`);
+  const parameters = Object.keys(opts).map(k => {
+    return [(0, _rskJsCli.argKey)(opts[k]), descs[k]];
+  });
   console.log('Usage:');
-  console.log(`${process.argv[0]} ${process.argv[1]} ${ars.join(' ')}`);
+  console.log(`${process.argv[0]} ${process.argv[1]} [ ${parameters.map(([k, d]) => `${k}=<...>`).join(' ')} ]`);
+  console.log();
+  for (const [o, t] of parameters) {
+    console.log(`${o}: ${t}`);
+  }
+  console.log();
   process.exit(0);
 }
