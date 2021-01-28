@@ -5,7 +5,7 @@ import { add0x } from '@rsksmart/rsk-utils'
 import { isValidMetadata, searchMetadata } from './solidityMetadata'
 import { decodeConstructorArgs, encodeConstructorArgs, getConstructorAbi } from './constructor'
 import { remove0x, isHexString } from '@rsksmart/rsk-utils/dist/strings'
-import { assert } from 'chai'
+import assert from 'assert'
 
 const SEVERITY_WARNING = 'warning'
 
