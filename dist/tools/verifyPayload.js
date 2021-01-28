@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";var _lib = require("./lib");
 var _rskJsCli = require("@rsksmart/rsk-js-cli");
 
@@ -6,7 +7,8 @@ const file = process.argv[2];
 const opts = {
   OUT_FILE: 'save',
   AUTOFIX: 'fix',
-  SHOW: 'show' };
+  SHOW: 'show',
+  SILENT: 'silent' };
 
 
 const args = (0, _rskJsCli.getArgs)(opts, process.argv.slice(3));
@@ -14,9 +16,11 @@ args.HELP = (0, _rskJsCli.parseArg)(process.argv, 'help');
 if (args.HELP || !file) showHelp();
 
 (0, _lib.verify)(file, args).
-then(() => process.exit(0)).
+then(() => {
+  process.exit(0);
+}).
 catch(err => {
-  console.error(err);
+  if (!args.SILENT) _rskJsCli.log.error(err);
   process.exit(9);
 });
 
@@ -32,7 +36,8 @@ function showHelp() {
   console.log();
   console.log(`--${opts.OUT_FILE} | --${opts.OUT_FILE}=fileName -> Saves result to file.`);
   console.log();
-  console.log(`--${opts.SHOW} -> Show result.`);
+  console.log(`--${opts.SHOW} -> Show full result.`);
   console.log();
+  console.log(`--${opts.SILENT} -> Suppress output.`);
   process.exit(0);
 }

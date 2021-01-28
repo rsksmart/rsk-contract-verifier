@@ -5,7 +5,7 @@ var _rskUtils = require("@rsksmart/rsk-utils");
 var _solidityMetadata = require("./solidityMetadata");
 var _constructor = require("./constructor");
 var _strings = require("@rsksmart/rsk-utils/dist/strings");
-var _chai = require("chai");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _assert = _interopRequireDefault(require("assert"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 const SEVERITY_WARNING = 'warning';
 
@@ -225,10 +225,10 @@ function resultSettings(compiled) {
 
 function isVerified({ bytecodeHash, resultBytecodeHash }) {
   try {
-    _chai.assert.deepEqual((0, _strings.isHexString)(bytecodeHash), true);
-    _chai.assert.deepEqual((0, _strings.isHexString)(resultBytecodeHash), true);
-    _chai.assert.deepEqual(bytecodeHash.length, 66);
-    _chai.assert.deepEqual(bytecodeHash, resultBytecodeHash);
+    _assert.default.deepEqual((0, _strings.isHexString)(bytecodeHash), true);
+    _assert.default.deepEqual((0, _strings.isHexString)(resultBytecodeHash), true);
+    _assert.default.deepEqual(bytecodeHash.length, 66);
+    _assert.default.deepEqual(bytecodeHash, resultBytecodeHash);
     return bytecodeHash === resultBytecodeHash;
   } catch (err) {
     return false;

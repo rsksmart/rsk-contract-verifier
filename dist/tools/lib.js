@@ -27,7 +27,7 @@ function showResult(result, full) {
       console.log();
       _rskJsCli.log.label(JSON.stringify({ bytecodeHash, resultBytecodeHash }, null, 2));
     } else {
-      _rskJsCli.log.error((0, _rskJsCli.tag)('Verification failed', '='));
+      // log.error(tag('Verification failed', '='))
       if (result.tryThis) {
         console.log();
         _rskJsCli.log.info('Please try again using some of these parameters:');
@@ -40,12 +40,10 @@ function showResult(result, full) {
     }
     if (warnings) {
       _rskJsCli.log.warn((0, _rskJsCli.tag)('Warnings'));
-      _rskJsCli.log.error(JSON.stringify(warnings, null, 2));
+      _rskJsCli.log.warn(JSON.stringify(warnings, null, 2));
     }
-    process.exit(0);
   } catch (err) {
-    console.error(err);
-    process.exit(9);
+    throw err;
   }
 }
 
@@ -92,9 +90,9 @@ async function verify(file, options) {
       const outFile = await saveOutput(options.OUT_FILE, verification, file);
       _rskJsCli.log.info((0, _rskJsCli.tag)(`The result was saved in ${outFile}`));
     }
-    showResult(verification, options.SHOW);
+    if (!options.SILENT) showResult(verification, options.SHOW);
+    if (!(0, _verifier.isVerified)(verification)) throw new Error('Verification failed');
   } catch (err) {
-    console.error(err);
-    process.exit(9);
+    return Promise.reject(err);
   }
 }

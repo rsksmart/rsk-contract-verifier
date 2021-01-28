@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";var _path = _interopRequireDefault(require("path"));
 var _lib = require("./lib");
 var _rskJsCli = require("@rsksmart/rsk-js-cli");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
