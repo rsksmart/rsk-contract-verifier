@@ -66,3 +66,9 @@ before run the server:
 }
 
   ```
+
+## CLI tools
+
+- **rsk-cv-create-payload**: creates JSON payload for verifier.
+
+- **rsk-cv-verify**: verifies a contract payload.

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import path from 'path'
 import { readFile, readDir } from './lib'
 import { argKey, getArgs } from '@rsksmart/rsk-js-cli'

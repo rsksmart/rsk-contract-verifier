@@ -12,6 +12,10 @@
     "test": "npx mocha test/**/*.spec.js",
     "cache-solc": "node dist/tools/cacheSolcVersions.js | npx bunyan "
   },
+  "bin": {
+    "rsk-cv-verify": "./dist/tools/verifyPayload.js",
+    "rsk-cv-create-payload": "./dist/tools/srcToJson.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/rsksmart/rsk-contract-verifier"

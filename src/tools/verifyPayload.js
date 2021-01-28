@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { verify } from './lib'
 import { parseArg, getArgs, argKey, log } from '@rsksmart/rsk-js-cli'
 
