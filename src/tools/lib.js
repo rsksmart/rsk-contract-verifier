@@ -27,7 +27,7 @@ export function showResult (result, full) {
       console.log()
       log.label(JSON.stringify({ bytecodeHash, resultBytecodeHash }, null, 2))
     } else {
-      log.error(tag('Verification failed', '='))
+      // log.error(tag('Verification failed', '='))
       if (result.tryThis) {
         console.log()
         log.info('Please try again using some of these parameters:')
@@ -40,12 +40,10 @@ export function showResult (result, full) {
     }
     if (warnings) {
       log.warn(tag('Warnings'))
-      log.error(JSON.stringify(warnings, null, 2))
+      log.warn(JSON.stringify(warnings, null, 2))
     }
-    process.exit(0)
   } catch (err) {
-    console.error(err)
-    process.exit(9)
+    throw (err)
   }
 }
 
@@ -92,9 +90,9 @@ export async function verify (file, options) {
       const outFile = await saveOutput(options.OUT_FILE, verification, file)
       log.info(tag(`The result was saved in ${outFile}`))
     }
-    showResult(verification, options.SHOW)
+    if (!options.SILENT) showResult(verification, options.SHOW)
+    if (!isVerified(verification)) throw new Error('Verification failed')
   } catch (err) {
-    console.error(err)
-    process.exit(9)
+    return Promise.reject(err)
   }
 }

@@ -1,12 +1,13 @@
 import { verify } from './lib'
-import { parseArg, getArgs, argKey } from '@rsksmart/rsk-js-cli'
+import { parseArg, getArgs, argKey, log } from '@rsksmart/rsk-js-cli'
 
 const file = process.argv[2]
 
 const opts = {
   OUT_FILE: 'save',
   AUTOFIX: 'fix',
-  SHOW: 'show'
+  SHOW: 'show',
+  SILENT: 'silent'
 }
 
 const args = getArgs(opts, process.argv.slice(3))
@@ -14,9 +15,11 @@ args.HELP = parseArg(process.argv, 'help')
 if (args.HELP || !file) showHelp()
 
 verify(file, args)
-  .then(() => process.exit(0))
+  .then(() => {
+    process.exit(0)
+  })
   .catch((err) => {
-    console.error(err)
+    if (!args.SILENT) log.error(err)
     process.exit(9)
   })
 
@@ -32,7 +35,8 @@ function showHelp () {
   console.log()
   console.log(`--${opts.OUT_FILE} | --${opts.OUT_FILE}=fileName -> Saves result to file.`)
   console.log()
-  console.log(`--${opts.SHOW} -> Show result.`)
+  console.log(`--${opts.SHOW} -> Show full result.`)
   console.log()
+  console.log(`--${opts.SILENT} -> Suppress output.`)
   process.exit(0)
 }
