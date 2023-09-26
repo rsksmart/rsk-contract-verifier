@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:20.7.0
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && \
     apt-get install -y build-essential apt-utils git curl supervisor systemd software-properties-common && \
