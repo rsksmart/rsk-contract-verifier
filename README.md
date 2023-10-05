@@ -4,7 +4,7 @@
 
 ## Requisites
 
-- node >= 20.7.0
+- node >= 19.9.0
 
 ## Install
 
