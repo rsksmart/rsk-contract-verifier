@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/tpm
     docker:
-      - image: circleci/node:20.7.0
+      - image: circleci/node:19.9.0
 
     steps:
       - checkout
