@@ -1,6 +1,6 @@
 {
   "name": "@rsksmart/rsk-contract-verifier",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Smart contract source code verifier",
   "main": "dist/index.js",
   "scripts": {
@@ -37,7 +37,7 @@
     "cbor": "^5.1.0",
     "require-from-string": "^2.0.2",
     "socket.io": "^2.3.0",
-    "solc": "^0.5.13"
+    "solc": "0.8.21"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.2",

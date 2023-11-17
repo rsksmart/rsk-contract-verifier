@@ -1,0 +1,13 @@
+{
+  "name": "Storage",
+  "source": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity ^0.8.16;\n\ncontract Storage {\n    uint256 storedNumber = 0;\n    event NewStoredNumber(uint256 indexed newNumber, uint256 indexed oldNumber);\n    function store(uint256 num) public {\n        storedNumber = num;\n    }\n    function retrieve() public view returns (uint256){\n        return storedNumber;\n    }\n}\n",
+  "version": "0.8.16+commit.07a7930e",
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": "200"
+    },
+    "evmVersion": "istanbul"
+  },
+  "bytecode": "60806040526000805534801561001457600080fd5b5060ac806100236000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80632e64cec11460375780636057361d14604c575b600080fd5b60005460405190815260200160405180910390f35b605c6057366004605e565b600055565b005b600060208284031215606f57600080fd5b503591905056fea2646970667358221220aee77b7b93f29300499b96c0ea9b7bff898c2376c10b8daf9a9637e24c7fe00d64736f6c63430008100033"
+}

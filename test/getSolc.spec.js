@@ -18,6 +18,7 @@ const test = JSON.parse(`{
   "build": "commit.23d335f2",
   "longVersion": "0.5.8+commit.23d335f2",
   "keccak256": "0x7bdfc3e09790d5b1f488b10a8c0da4f85a8a64482c2be5566969feafdd7deb9d",
+  "sha256": "0xdda3f35c4bd4380ae66a3268df92c260d707cea256dfcafa265637b6d8bd63f5",
   "urls": [
     "bzzr://8923240b6d3f6e2f38ced6d5f8bfeb1b8a64ee49cdd358ea5c582dde194a699a",
     "dweb:/ipfs/QmdLsm73rn9KSHukKrZPbuzWGUmrwKugdpDExKSqowvHgz"
