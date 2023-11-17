@@ -45,7 +45,7 @@ function Compiler({ solcCache } = {}) {
       }
       const snapshot = await getSnapshot(version || 'latest');
       if (!snapshot.compile) throw new Error(`Can't load snapshot ${version}`);
-      const res = snapshot.compile(input, resolveImports);
+      const res = snapshot.compile(input, { import: resolveImports });
       if (!res) throw new Error('Empty result');
       return JSON.parse(res);
     } catch (err) {

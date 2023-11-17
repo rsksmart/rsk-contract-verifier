@@ -18,7 +18,7 @@ const descs = {
 let { FILE, DIR, PAYLOAD } = (0, _rskJsCli.getArgs)(opts, process.argv);
 PAYLOAD = PAYLOAD || _path.default.join(__dirname, 'payload.example.json');
 
-if (typeof file !== 'string') help();
+if (typeof FILE !== 'string') help();
 convert(FILE, DIR, PAYLOAD).then(() => process.exit(0));
 
 async function loadFile(file) {
