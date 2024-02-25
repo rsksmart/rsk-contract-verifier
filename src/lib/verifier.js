@@ -21,8 +21,8 @@ export function Verifier (options = {}) {
       const KEY = name
       resolveImports = resolveImports || compiler.getImports(imports)
       const settings = payload.settings || {}
-      let sources = {}
       const usedSources = []
+      const sources = payload.sources || { [KEY]: { content: source } }
 
       // wraps resolveImports method to catch used sources
       const updateUsedSources = (path) => {
@@ -33,7 +33,6 @@ export function Verifier (options = {}) {
         return resolveImports(path)
       }
 
-      sources[KEY] = { content: source }
       const input = compiler.createInput({ sources, settings })
 
       const compilationResult = await compiler.compile(input, { version, resolveImports: updateUsedSources })
@@ -41,8 +40,36 @@ export function Verifier (options = {}) {
       const { errors, warnings } = filterResultErrors(compilationResult)
       if (errors) return { errors, warnings }
 
-      if (!contracts || !contracts[KEY]) throw new Error('Empty compilation result')
-      const compiled = contracts[KEY][name]
+      let compiled = contracts[KEY] ? contracts[KEY][name] : undefined
+
+      if (!compiled) {
+        for (const path of Object.keys(contracts)) {
+          const file = path.split('/').pop()
+          if (file.split('.')[0] === KEY) {
+            compiled = contracts[path][KEY]
+          }
+        }
+      }
+
+      if (!compiled) throw new Error('Empty compilation result')
+
+      if (!usedSources.length) {
+        const { sources } = JSON.parse(compiled.metadata)
+
+        for (const [path, { content }] of Object.entries(sources)) {
+          const name = path.split('/').pop().split()
+          const sourceObj = { path, file: path.split('/').pop() }
+          
+          if (name === KEY) {
+            sourceObj.contents = content
+            usedSources.unshift(sourceObj)
+          } else {
+            sourceObj.hash = getHash(content)
+            usedSources.push(sourceObj)
+          }
+        }
+      }
+
       const { evm, abi } = compiled
       const result = verifyResults({ contractName: KEY, bytecode, evm, libraries, constructorArguments: payload.constructorArguments, encodedConstructorArguments: payload.encodedConstructorArguments, abi })
       const { resultBytecode, orgBytecode, usedLibraries, decodedMetadata, constructorArguments, encodedConstructorArguments, tryThis } = result
