@@ -23,6 +23,7 @@ export function Verifier (options = {}) {
       const settings = payload.settings || {}
       const usedSources = []
       const sources = payload.sources || { [KEY]: { content: source } }
+      const standardJsonInputMethod = !!payload.sources
 
       // wraps resolveImports method to catch used sources
       const updateUsedSources = (path) => {
@@ -53,21 +54,23 @@ export function Verifier (options = {}) {
 
       if (!compiled) throw new Error('Empty compilation result')
 
-      if (!usedSources.length) {
-        const { sources } = JSON.parse(compiled.metadata)
+      if (standardJsonInputMethod && !usedSources.length) {
+        try {
+          const { sources } = JSON.parse(compiled.metadata)
 
-        for (const [path, { content }] of Object.entries(sources)) {
-          const name = path.split('/').pop().split()
-          const sourceObj = { path, file: path.split('/').pop() }
-          
-          if (name === KEY) {
-            sourceObj.contents = content
-            usedSources.unshift(sourceObj)
-          } else {
-            sourceObj.hash = getHash(content)
-            usedSources.push(sourceObj)
+          for (const [path, { content }] of Object.entries(sources)) {
+            const name = path.split('/').pop().split()
+            const sourceObj = { path, file: path.split('/').pop() }
+
+            if (name === KEY) {
+              sourceObj.contents = content
+              usedSources.unshift(sourceObj)
+            } else {
+              sourceObj.hash = getHash(content)
+              usedSources.push(sourceObj)
+            }
           }
-        }
+        } catch (e) {}
       }
 
       const { evm, abi } = compiled
