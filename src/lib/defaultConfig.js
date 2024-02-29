@@ -3,5 +3,6 @@ export default {
   port: 3008,
   solcCache: '/tmp/solc',
   log: {},
-  timeout: 60000
+  timeout: 600000
 }
+
