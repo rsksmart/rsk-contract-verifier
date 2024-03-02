@@ -45,8 +45,8 @@ export function Verifier (options = {}) {
 
       if (!compiled) {
         for (const path of Object.keys(contracts)) {
-          const file = path.split('/').pop()
-          if (file.split('.')[0] === KEY) {
+          const contractName = path.split('/').pop().split('.')[0]
+          if (contractName === KEY) {
             compiled = contracts[path][KEY]
           }
         }
@@ -59,18 +59,20 @@ export function Verifier (options = {}) {
           const { sources } = JSON.parse(compiled.metadata)
 
           for (const [path, { content }] of Object.entries(sources)) {
-            const name = path.split('/').pop().split()
+            const name = path.split('/').pop().split('.')[0]
             const sourceObj = { path, file: path.split('/').pop() }
 
             if (name === KEY) {
               sourceObj.contents = content
-              usedSources.unshift(sourceObj)
             } else {
               sourceObj.hash = getHash(content)
-              usedSources.push(sourceObj)
             }
+
+            usedSources.push(sourceObj)
           }
-        } catch (e) {}
+        } catch (err) {
+          return Promise.reject(err)
+        }
       }
 
       const { evm, abi } = compiled
