@@ -16,12 +16,20 @@ function Compiler({ solcCache } = {}) {
 
 
 
-    const { optimizer } = settings;
+    const { optimizer, metadata } = settings;
+
     if (optimizer) {
       let { runs } = optimizer;
       runs = runs ? parseInt(runs) : 200;
       settings.optimizer.runs = runs;
     }
+
+    if (metadata) {
+      settings.metadata.useLiteralContent = true;
+    } else {
+      settings.metadata = { useLiteralContent: true };
+    }
+
     return {
       language: 'Solidity',
       sources,
