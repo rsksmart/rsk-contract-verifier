@@ -5,4 +5,3 @@ export default {
   log: {},
   timeout: 600000
 }
-
