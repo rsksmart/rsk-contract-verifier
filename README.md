@@ -1,3 +1,7 @@
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rsksmart/rsk-contract-verifier/badge)](https://scorecard.dev/viewer/?uri=github.com/rsksmart/rsk-contract-verifier)
+[![CodeQL](https://github.com/rsksmart/rskj/workflows/CodeQL/badge.svg)](https://github.com/rsksmart/rsk-contract-verifier/actions?query=workflow%3ACodeQL)
+<img src="img/rootstock-docs.png" alt="RSK Logo" style="width:100%; height: auto;" />
+
 # Rsk contract verifier
 
 > Smart contract source code verifier.
